@@ -1,0 +1,361 @@
+<!doctype html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<link rel="shortcut icon" type="image/png" href="/assets/favicon.png"/>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+	<title>Game Dev Blog</title>
+	<style>
+	 * {
+		 box-sizing: border-box;
+	 }
+	 .wrapper {
+		 max-width: 1000px;
+		 margin: 0 auto;
+		 font-family: 'Open Sans', Arial;
+
+		 display: grid;
+		 grid-column-gap: 20px;
+	 	 grid-row-gap: 10px;
+		 grid-template-columns: 1fr;
+		 grid-template-areas:
+		 "header"
+		 "articles"
+		 "sidebar"
+		 "misc"
+		 "footer";
+	 }
+	 @media (min-width: 500px) {
+		 .wrapper {
+			 grid-template-columns: 3fr 1fr;
+			 grid-template-areas: 
+			 "header header"
+			 "misc misc"
+			 "articles sidebar"
+			 "footer footer";
+		 }
+	 }
+	 @media (min-width: 1600px) {
+		 .wrapper {
+			 max-width: 1100px;
+		 }
+	 }
+	 @media (min-width: 1700px) {
+		 .wrapper {
+			 max-width: 1200px;
+		 }
+	 }
+	 @media (min-width: 1800px) {
+		 .wrapper {
+			 max-width: 1300px;
+		 }
+	 }
+	 @media (min-width: 1900px) {
+		 .wrapper {
+			 max-width: 1400px;
+		 }
+	 }
+	 @media (min-width: 2000px) {
+		 .wrapper {
+			 max-width: 1500px;
+		 }
+	 }
+	 .header {
+		 grid-area: header;
+		 border-bottom: 2px solid;
+
+		 display: grid;
+		 align-items: center;
+		 justify-content: center;
+	 }
+	 .misc {
+	 	 grid-area: misc;
+	 	 display: grid;
+	 	 grid-column-gap: 20px;
+	 	 grid-template-columns: 1fr 2fr 1fr;
+	 	 grid-template-areas: 
+	 	 "padding navigation search"
+	 }
+	 .sidebar {
+		 grid-area: sidebar;
+	 }
+	 .articles {
+		 grid-area: articles;
+	 }
+	 .a-no-decoration {
+		 text-decoration: none;
+		 color: black;
+	 }
+	 ::placeholder {
+	 	 color: black;
+	 }
+	 .header-logo {
+		 margin: 0 0 4px 0;
+		 font-size: 2em;
+	 }
+	 .navigation {
+	 	 grid-area: navigation;
+	 	 display: grid;
+	 	 grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+	 	 grid-template-areas: 
+	 	 "a a a about contact b b b"
+	 }
+	 .navigation-text {
+	 	 margin: 0 0 0 0;
+	 	 font-size: 0.8em;
+	 	 text-align: center;
+	 	 height: 55%;
+	 }
+	 .navigation-text:hover {
+	 	 background-color: #c6c6c6;
+	 }
+	 .navigation-about {
+	 	 grid-area: about;
+	 }
+	 .navigation-contact {
+	 	 grid-area: contact;
+	 }
+	 .search {
+	 	 grid-area: search;
+	 }
+	 .search-input {
+		 width: 100%;
+		 border-radius: 8px;
+		 border: 1px solid #e6ecf0;
+		 padding: 8px 12px 8px 12px;
+	 }
+	 .search-input:focus{
+		 outline: 0;
+     box-shadow: 0 0 3pt 2pt #535959;
+	 }
+	 .sidebar-header {
+	 	 width: 90%;
+	 	 margin: 1.15em auto;
+	 	 border-bottom: 2px solid;
+	 	 margin-bottom: 10px;
+
+ 	 	 display: grid;
+	 	 align-items: center;
+	 	 justify-content: center;
+	 }
+	 .sidebar-header-text {
+	 	 margin: 0 0 3px 0;
+	 	 font-size: 1em;
+	 	 font-weight: bold;
+	 }
+	 .sidebar-links {
+	 	 width: 90%;
+	 	 margin: 0 auto;
+	 }
+	 .sidebar-link {
+	 }
+	 .article-title {
+	 	 width: 100%;
+	 	 border-bottom: 2px solid;
+	 	 margin-bottom: 4px;
+	 }
+	 .article-title-text {
+	 	 margin-top: 0;
+	 	 margin-bottom: 0;
+		 font-size: 2em;
+		 font-weight: bold;
+   }
+	 .article-create-time {
+	 	 display: grid;
+	 	 grid-template-columns: 5fr 1fr;
+	 	 grid-template-areas: 
+	 	 "padding time";
+	 }
+	 .article-create-time-text {
+		 margin: 0 0 0 0;
+		 grid-area: time;
+		 align-self: center;
+		 justify-self: center;
+	 }
+	 .article-text {
+		 margin: 0 0 0 0;
+		 line-height: 2;
+	 }
+	 .article-text-max-height {
+		 max-height: 300px;
+		 overflow: hidden;
+	 }
+	 .go-to-article {
+  	 display: inline-block;
+	 	 padding: 10px 10px 10px 10px;
+	 	 margin-top: 16px;
+	 	 background-color: #e8e8e8;
+	 }
+	 .comments {
+		 padding-top: 15px;
+		 border-top: 2px solid;
+	 }
+	 .comment-form-field {
+		 margin-bottom: 4px;
+	 }
+	 .comment-form-label {
+		 display: inline-block;
+		 width: 60px;
+	 }
+	 .comment-form-name {
+		 width: 300px;
+	 }
+	 .comment-form-email {
+		 width: 300px;
+	 }
+	 .comment-form-text {
+		 width: 300px;
+		 vertical-align: top;
+		 height: 5em;
+	 }
+	 .comment-form-submit-button {
+		 padding-left: 60px;
+		 margin-left: .25em;
+	 }
+	 .comment-count {
+	 	  margin-top: 20px;
+	 	  text-align: right;
+	 	  font-weight: bold;
+	 	}
+	 .comment {
+	 }
+	 .comment-header {
+	 	 background-color: #e8e8e8;
+	 	 display: flex;
+	 }
+	 .comment-image {
+	 }
+	 .comment-name {
+		 margin: 0 0 0 10px;
+		 font-weight: bold;
+		 align-self: center;
+		 justify-self: center;
+	 }
+	 .comment-create-time {
+		 margin: 0 0 0 10px;
+		 align-self: center;
+		 justify-self: center;
+		 font-size: 0.75em;
+	 }
+	 .comment-text {
+	 }
+	</style>
+</head>
+
+<body>
+	<div class="wrapper">
+		<header class="header">
+			<a class="a-no-decoration" href="/">
+				<h1 class="header-logo">Game Dev Blog</h1>
+			</a>
+		</header>
+
+		<div class=misc>
+			<div class="navigation">
+			<a class="navigation-text navigation-about a-no-decoration" href="/about">About</a>
+			<a class="navigation-text navigation-contact a-no-decoration" href="/contact">Contact</a>
+			</div>
+			<div class="search">
+				<form action="/blog/search">
+					<input type="text" class="search-input" placeholder="Search">
+				</form>
+			</div>
+		</div>
+
+		{{if .GenerateAboutHTML}}
+			<div style="margin:0 auto; grid-area: footer">
+				Nothing to see here yet...
+			</div>
+		{{else if .GenerateContactHTML}}
+		<div style="margin:0 auto; grid-area: footer">
+			You can contact me at <a href="mailto:yngccc@gmail.com">yngccc@gmail.com</a>
+		</div>
+		{{else}}
+		<div class="sidebar">
+			<div class="sidebar-header">
+				<p class="sidebar-header-text">Recent Articles</p>
+			</div>
+			<div class="sidebar-links">
+				<ul>
+					{{range $i, $a := .Articles}}
+					{{if lt $i 8}}
+					<li>
+						<a class="sidebar-link a-no-decoration" href="/blog/{{$a.ID}}"><div>{{$a.Title}}</div></a>
+					</li>
+					{{end}}
+					{{end}}
+				</ul>
+			</div>
+		</div>
+
+		<div class="articles">
+			{{if .GenerateBlogHTML}}
+			{{range $i, $article := .Articles}}
+			{{if le $i 8}}
+			<div class=article>
+				<div class=article-title>
+					<a class="a-no-decoration" href="/blog/{{.ID}}">
+						<p class="article-title-text">{{$article.Title}}</p>
+					</a>
+				</div>
+				<div class="article-create-time">
+					<p class="article-create-time-text">{{$article.CreationTime.Format "Jan 2, 2006"}}</p>
+				</div>
+				<div class="article-text article-text-max-height">{{$article.HTML}}</div>
+				<a class="go-to-article a-no-decoration" href="/blog/{{.ID}}">Read in Full  →</a>
+			</div>
+			{{end}}
+			{{end}}
+			{{else if .GenerateArticleHTML}}
+			{{with $article := index .Articles .ArticleIndex}}
+			<div class=article>
+				<div class=article-title>
+					<a class="a-no-decoration" href="/blog/{{.ID}}">
+						<p class="article-title-text">{{$article.Title}}</p>
+					</a>
+				</div>
+				<div class="article-create-time">
+					<p class="article-create-time-text">{{$article.CreationTime.Format "Jan 2, 2006"}}</p>
+				</div>
+				<div class="article-text">{{$article.HTML}}</div>
+			</div>
+			<div class="comments">
+				<form action="/blog/comment" method="post">
+					<input type="hidden" name="article-id" value="{{$article.ID}}">
+					<div class="comment-form-field">
+						<label class="comment-form-label" for="name">Name:</label>
+						<input type="text" class="comment-form-name" name="name" required>
+					</div>
+					<div class="comment-form-field">
+						<label class="comment-form-label" for="email">Email:</label>
+						<input type="email" class="comment-form-email" name="email">
+					</div>
+					<div class="comment-form-field">
+						<label class="comment-form-label" for="text">Text:</label>
+						<textarea class="comment-form-text" name="text" required></textarea>
+					</div>
+					<div class="comment-form-submit-button">
+						<button type="submit">Post Comment</button>
+					</div>
+				</form>
+				<div class="comment-count">
+					{{len $article.Comments}} Comments
+				</div>
+				{{range $i, $comment := (ReverseComments $article.Comments)}}
+				<div class="comment" id="comment-{{$i}}">
+					<div class="comment-header">
+						<img class="comment-image" src="https://www.gravatar.com/avatar/{{EmailHash $comment.CommenterEmail}}?s=25"/>
+						<p class="comment-name">{{$comment.CommenterName}}</p>
+						<p class="comment-create-time">{{$comment.CreationTime.Format "Jan 2, 2006"}}</p>
+					</div>
+					<p class="comment-text">{{$comment.Text}}</p>
+				</div>
+				{{end}}
+			</div>
+			{{end}}
+			{{end}}
+		</div>
+		{{end}}
+	</div>
+</body>	
+</html>

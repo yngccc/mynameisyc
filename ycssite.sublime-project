@@ -1,0 +1,4 @@
+{
+	"folders": [{"path": "."}],
+	"build_systems": [{"name": "ycssite_build", "shell_cmd": "taskkill /f /im ycssite.exe & go build & ycssite.exe", "file_regex": "^(.*):([0-9]+): (.*)$", "working_dir": "${project_path}", "shell": true}],
+}
