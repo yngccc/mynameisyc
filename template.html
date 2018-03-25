@@ -17,22 +17,22 @@
 		 display: grid;
 		 grid-column-gap: 20px;
 	 	 grid-row-gap: 10px;
-		 grid-template-columns: 1fr;
-		 grid-template-areas:
-		 "header"
-		 "articles"
-		 "sidebar"
-		 "misc"
-		 "footer";
+	 	 grid-template-columns: 3fr 1fr;
+	 	 grid-template-areas: 
+	 	 "header header"
+	 	 "misc misc"
+	 	 "articles sidebar"
+	 	 "footer footer";
 	 }
-	 @media (min-width: 500px) {
+	 @media (max-width: 500px) {
 		 .wrapper {
-			 grid-template-columns: 3fr 1fr;
-			 grid-template-areas: 
-			 "header header"
-			 "misc misc"
-			 "articles sidebar"
-			 "footer footer";
+		 	 grid-template-columns: 1fr;
+		 	 grid-template-areas:
+		 	 "header"
+		 	 "articles"
+		 	 "sidebar"
+		 	 "misc"
+		 	 "footer";
 		 }
 	 }
 	 @media (min-width: 1600px) {
@@ -76,6 +76,15 @@
 	 	 grid-template-areas: 
 	 	 "padding navigation search"
 	 }
+	 @media (max-width: 500px) {
+		 .misc {
+		 	 grid-row-gap: 20px;
+		 	 grid-template-columns: 1fr;
+		 	 grid-template-areas: 
+		 	 "navigation"
+		 	 "search";
+		 }
+	 }
 	 .sidebar {
 		 grid-area: sidebar;
 	 }
@@ -107,15 +116,25 @@
 	 .navigation {
 	 	 grid-area: navigation;
 	 	 display: grid;
-	 	 grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+	 	 grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 	 	 grid-template-areas: 
-	 	 "a a a about contact b b b"
+	 	 "a a about contact github b b"
 	 }
 	 .navigation-text {
 	 	 margin: 0 0 0 0;
 	 	 font-size: 0.8em;
 	 	 text-align: center;
 	 	 height: 55%;
+	 }
+	 @media (max-width: 500px) {
+	 	 .navigation {
+	 	   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+	 	   grid-template-areas: 
+	 	   "a about contact github b"
+	 	 }
+		 .navigation-text {
+	 	   height: 100%;
+		 }
 	 }
 	 .navigation-text:hover {
 	 	 background-color: #c6c6c6;
@@ -125,6 +144,9 @@
 	 }
 	 .navigation-contact {
 	 	 grid-area: contact;
+	 }
+	 .navigation-github {
+	 	 grid-area: github;
 	 }
 	 .search {
 	 	 grid-area: search;
@@ -159,6 +181,9 @@
 	 	 margin: 0 auto;
 	 }
 	 .sidebar-link {
+	 }
+	 .article {
+	 	 margin-bottom: 40px;
 	 }
 	 .article-title {
 	 	 width: 100%;
@@ -254,6 +279,7 @@
 			<div class="navigation">
 			<a class="navigation-text navigation-about a-no-decoration" href="/about">About</a>
 			<a class="navigation-text navigation-contact a-no-decoration" href="/contact">Contact</a>
+			<a class="navigation-text navigation-github a-no-decoration" href="https://github.com/yngccc">Github</a>
 			</div>
 			<div class="search">
 				<form action="/blog/search">

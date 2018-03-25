@@ -82,18 +82,14 @@ type articleUpdate struct {
 }
 
 func main() {
-	var err error
-
 	log.SetFlags(log.Lshortfile)
 
 	dbPassword := flag.String("dbpass", "", "postgresql password")
 	inProduction := flag.Bool("production", false, "in production")
 	flag.Parse()
 
-	var db *sql.DB
-	var dbConnStr string
-	dbConnStr = "user=postgres dbname=ycssite sslmode=disable password=" + *dbPassword
-	db, err = sql.Open("postgres", dbConnStr)
+	dbConnStr := "user=postgres dbname=ycssite sslmode=disable password=" + *dbPassword
+	db, err := sql.Open("postgres", dbConnStr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -111,9 +107,7 @@ func main() {
 			defer article_rows.Close()
 			for article_rows.Next() {
 				var article article
-				var html string
-				article_rows.Scan(&article.CreationTime, &article.UpdateTime, &article.Title, &html, &article.ID)
-				article.Body = template.HTML(html)
+				article_rows.Scan(&article.CreationTime, &article.UpdateTime, &article.Title, &article.Body, &article.ID)
 				var comment_rows *sql.Rows
 				comment_rows, err = db.Query("SELECT * FROM comments WHERE article_id = $1 ORDER by creation_time DESC", article.ID)
 				if err == nil {
@@ -347,7 +341,7 @@ func main() {
 		}
 		for update := range articleUpdateChannel {
 			if update.kind == newArticleFlag {
-				_, err = db.Exec("INSERT INTO articles (title, body) VALUES ($1, $2)", update.article.Title, update.article.Body)
+				_, err := db.Exec("INSERT INTO articles (title, body) VALUES ($1, $2)", update.article.Title, update.article.Body)
 				if err != nil {
 					update.responseChannel <- articleUpdateResponse{false, fmt.Sprintf("Error inserting article into database: %s", err)}
 				} else {
@@ -382,7 +376,7 @@ func main() {
 						update.article.UpdateTime, update.article.Title, update.article.Body, update.article.ID)
 				} else if update.article.Title != "" {
 					result, err = db.Exec(
-						"UPDATE articles SET update_time=$1, title=$2, WHERE id=$3",
+						"UPDATE articles SET update_time=$1, title=$2 WHERE id=$3",
 						update.article.UpdateTime, update.article.Title, update.article.ID)
 				} else if update.article.Body != "" {
 					result, err = db.Exec(
@@ -398,17 +392,21 @@ func main() {
 					n, err := result.RowsAffected()
 					if err != nil {
 						update.responseChannel <- articleUpdateResponse{false, fmt.Sprintf("Error updating article with ID %d in database: %s", update.article.ID, err)}
-					} else if (n < 1) {
+					} else if n < 1 {
 						update.responseChannel <- articleUpdateResponse{false, fmt.Sprintf("Article ID %d not found in database", update.article.ID)}
-					} else if (n > 1) {
+					} else if n > 1 {
 						update.responseChannel <- articleUpdateResponse{false, fmt.Sprintf("Mutliple Articles with same ID %d found and updated in database, this should never happen", update.article.ID)}
 					} else {
 						updated := false
 						for i, _ := range articles {
 							if articles[i].ID == update.article.ID {
 								articles[i].UpdateTime = update.article.UpdateTime
-								articles[i].Title = update.article.Title
-								articles[i].Body = update.article.Body
+								if update.article.Title != "" {
+									articles[i].Title = update.article.Title
+								}
+								if update.article.Body != "" {
+									articles[i].Body = update.article.Body
+								}
 								updateBlogHTML()
 								updateArticleHTML(i)
 								updated = true
@@ -429,7 +427,7 @@ func main() {
 						if len(article.Comments) >= 512 {
 							update.responseChannel <- articleUpdateResponse{false, "Article comments maxed out"}
 						} else {
-							_, err = db.Exec(
+							_, err := db.Exec(
 								"INSERT INTO comments VALUES ($1, $2, $3, $4, $5, $6)",
 								update.comment.CommenterName,
 								update.comment.CommenterEmail,
@@ -474,15 +472,15 @@ func main() {
 		httpServer := makeServer(redirectHTTPSMux)
 		httpServer.Addr = ":80"
 		fmt.Print("\nstarted serving requests...\n")
-		err = httpServer.ListenAndServe()
+		err := httpServer.ListenAndServe()
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
 		httpServer := makeServer(mux)
-		httpServer.Addr = ":8000"
+		httpServer.Addr = ":7000"
 		fmt.Print("\nstarted serving requests...\n")
-		err = httpServer.ListenAndServe()
+		err := httpServer.ListenAndServe()
 		if err != nil {
 			log.Fatal(err)
 		}
