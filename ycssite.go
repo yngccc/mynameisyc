@@ -221,7 +221,7 @@ func main() {
 		}))
 	}
 
-	mux.HandleFunc("/blog/article", http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
+	mux.HandleFunc("/blog/new", http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		if request.Method == "GET" {
 			fmt.Fprint(response, articleUpdateHTML.html)
 		} else if request.Method == "POST" {
