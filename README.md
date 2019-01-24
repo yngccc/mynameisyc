@@ -1,1 +1,1 @@
-source code for **_www.ycssite.com_**
+source code for **_www.mynameisyc.com_**
