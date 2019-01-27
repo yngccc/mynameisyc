@@ -129,8 +129,8 @@ func main() {
 		httpsServer := makeServer(mux)
 		httpsServer.Addr = ":443"
 		go func() {
-			var fullchain = "/etc/letsencrypt/live/ycssite.com/fullchain.pem"
-			var privKey = "/etc/letsencrypt/live/ycssite.com/privkey.pem"
+			var fullchain = "/etc/letsencrypt/live/mynameisyc.com/fullchain.pem"
+			var privKey = "/etc/letsencrypt/live/mynameisyc.com/privkey.pem"
 			err := httpsServer.ListenAndServeTLS(fullchain, privKey)
 			if err != nil {
 				log.Fatal(err)
