@@ -2,9 +2,18 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<link rel="shortcut icon" type="image/png" href="/assets/favicon.png"/>
+	<link rel="shortcut icon" type="image/png" href="/favicon.png"/>
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-	<title>My name is yc</title>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-133286258-1"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-133286258-1');
+	</script>	
+
+	<title>My Name is YC</title>
 	<style>
 	 * {
 		 box-sizing: border-box;
@@ -296,28 +305,6 @@
 		<div style="margin:0 auto; grid-area: footer">
 			You can contact me at <a href="mailto:yngccc@gmail.com">yngccc@gmail.com</a>
 		</div>
-		{{else if .GenerateArticleUpdateHTML}}
-		<form action="/blog/new" method="post">
-			<div>
-				<label class="form-label" for="name">Pass:</label>
-				<input class="form-field" type="password" name="password">
-			</div>
-			<div>
-				<label class="form-label" for="name">ID:</label>
-				<input class="form-field" type="number" name="article-id">
-			</div>
-			<div>
-				<label class="form-label" for="name">Title:</label>
-				<input style="width: 400px" class="form-field" type="text" name="article-title">
-			</div>
-			<div>
-				<label class="form-label" for="name">Body:</label>
-				<textarea style="width: 400px; height: 400px" name="article-body"></textarea>
-			</div>
-			<div class="form-submit-button">
-				<button type="submit">Submit</button>
-			</div>
-		</form>
 		{{else}}
 		<div class="sidebar">
 			<div class="sidebar-header">
@@ -337,7 +324,7 @@
 		</div>
 
 		<div class="articles">
-			{{if .GenerateBlogHTML}}
+			{{if .GenerateArticlesHTML}}
 			{{range $i, $article := .Articles}}
 			{{if le $i 8}}
 			<div class=article>
@@ -366,39 +353,6 @@
 					<p class="article-create-time-text">{{$article.CreationTime.Format "Jan 2, 2006"}}</p>
 				</div>
 				<div class="article-text">{{$article.Body}}</div>
-			</div>
-			<div class="comments">
-				<form action="/blog/comment" method="post">
-					<input type="hidden" name="article-id" value="{{$article.ID}}">
-					<div class="form-field">
-						<label class="form-label" for="name">Name:</label>
-						<input type="text" class="comment-form-name" name="name" required>
-					</div>
-					<div class="form-field">
-						<label class="form-label" for="email">Email:</label>
-						<input type="email" class="comment-form-email" name="email">
-					</div>
-					<div class="form-field">
-						<label class="form-label" for="text">Text:</label>
-						<textarea class="comment-form-text" name="text" required></textarea>
-					</div>
-					<div class="form-submit-button">
-						<button type="submit">Post Comment</button>
-					</div>
-				</form>
-				<div class="comment-count">
-					{{len $article.Comments}} Comments
-				</div>
-				{{range $i, $comment := $article.Comments}}
-				<div class="comment" id="comment-{{$i}}">
-					<div class="comment-header">
-						<img class="comment-image" src="https://www.gravatar.com/avatar/{{EmailHash $comment.CommenterEmail}}?s=25"/>
-						<p class="comment-name">{{$comment.CommenterName}}</p>
-						<p class="comment-create-time">{{$comment.CreationTime.Format "Jan 2, 2006"}}</p>
-					</div>
-					<p class="comment-text">{{$comment.Text}}</p>
-				</div>
-				{{end}}
 			</div>
 			{{end}}
 			{{end}}

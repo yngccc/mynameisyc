@@ -42,38 +42,6 @@ func main() {
 	flag.Parse()
 
 	articles := make([]article, 0, 256)
-	// {
-	// 	var article_rows *sql.Rows
-	// 	article_rows, err = db.Query("SELECT * FROM articles ORDER By creation_time DESC")
-	// 	if err == nil {
-	// 		defer article_rows.Close()
-	// 		for article_rows.Next() {
-	// 			var article article
-	// 			article_rows.Scan(&article.CreationTime, &article.UpdateTime, &article.Title, &article.Body, &article.ID)
-	// 			var comment_rows *sql.Rows
-	// 			comment_rows, err = db.Query("SELECT * FROM comments WHERE article_id = $1 ORDER by creation_time DESC", article.ID)
-	// 			if err == nil {
-	// 				defer comment_rows.Close()
-	// 				for comment_rows.Next() {
-	// 					var comment comment
-	// 					comment_rows.Scan(&comment.CommenterName, &comment.CommenterEmail, &comment.Text, &comment.CreationTime, &comment.ArticleID, &comment.CommenterIP)
-	// 					article.Comments = append(article.Comments, comment)
-	// 				}
-	// 				if comment_rows.Err() != nil {
-	// 					log.Fatal(comment_rows.Err())
-	// 				}
-	// 			} else {
-	// 				log.Print(err)
-	// 			}
-	// 			articles = append(articles, article)
-	// 		}
-	// 		if article_rows.Err() != nil {
-	// 			log.Fatal(article_rows.Err())
-	// 		}
-	// 	} else {
-	// 		log.Print(err)
-	// 	}
-	// }
 
 	htmlTemplate, err := template.New("template.html").ParseFiles("template.html")
 	if err != nil {
@@ -127,25 +95,26 @@ func main() {
 	redirectHTTPSMux := new(http.ServeMux)
 	mux := new(http.ServeMux)
 
-	redirectHTTPSMux.HandleFunc("/", http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		http.Redirect(response, request, "https://"+request.Host+request.URL.String(), http.StatusMovedPermanently)
+	redirectHTTPSMux.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://" + r.Host + r.URL.String(), http.StatusMovedPermanently)
 	}))
-	mux.HandleFunc("/about", http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		fmt.Fprint(response, aboutHTML)
+	mux.HandleFunc("/about", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, aboutHTML)
 	}))
-	mux.HandleFunc("/contact", http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		fmt.Fprint(response, contactHTML)
+	mux.HandleFunc("/contact", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, contactHTML)
 	}))
-	mux.HandleFunc("/articles", http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		fmt.Fprint(response, articlesHTML)
+	mux.HandleFunc("/articles", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, articlesHTML)
 	}))
 	for i, article := range articles {
-		mux.HandleFunc("/articles/"+strconv.Itoa(article.ID), http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-			fmt.Fprint(response, articleHTMLs[i])
+		mux.HandleFunc("/articles/"+strconv.Itoa(article.ID), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, articleHTMLs[i])
 		}))
 	}
-	mux.Handle("/assets/", http.StripPrefix("/assets", http.FileServer(http.Dir("./assets"))))
-	mux.Handle("/favicon.ico", http.NotFoundHandler())
+	mux.HandleFunc("/favicon.png", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    http.ServeFile(w, r, "favicon.png")
+	}))
 	mux.Handle("/", http.RedirectHandler("/articles", http.StatusFound))
 
 	makeServer := func(mux *http.ServeMux) http.Server {
