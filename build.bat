@@ -3,10 +3,10 @@ echo.
 
 pushd "%~dp0"
 
-taskkill /f /im ycssite.exe 2>nul
+taskkill /f /im mynameisyc.exe 2>nul
 
 go build
 
-ycssite.exe
+mynameisyc.exe
 
 popd

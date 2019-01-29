@@ -27,12 +27,9 @@ type article struct {
 }
 
 type templateVars struct {
-	GenerateArticlesHTML      bool
-	GenerateArticleHTML       bool
-	GenerateAboutHTML         bool
-	GenerateContactHTML       bool
-	Articles                  []article
-	ArticleIndex              int
+	GenerateType string
+	Articles     []article
+	ArticleIndex int
 }
 
 func main() {
@@ -47,31 +44,29 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	var tmplVars templateVars
+	tmplVars.Articles = articles
 
 	aboutHTML := new(bytes.Buffer)
 	{
-		var tvars templateVars
-		tvars.GenerateAboutHTML = true
-		err := htmlTemplate.Execute(aboutHTML, tvars)
+		tmplVars.GenerateType = "GenerateAboutHTML"
+		err := htmlTemplate.Execute(aboutHTML, tmplVars)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 	contactHTML := new(bytes.Buffer)
 	{
-		var tvars templateVars
-		tvars.GenerateContactHTML = true
-		err := htmlTemplate.Execute(contactHTML, tvars)
+		tmplVars.GenerateType = "GenerateContactHTML"
+		err := htmlTemplate.Execute(contactHTML, tmplVars)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 	articlesHTML := new(bytes.Buffer)
 	{
-		var tvars templateVars
-		tvars.GenerateArticlesHTML = true
-		tvars.Articles = articles
-		err := htmlTemplate.Execute(articlesHTML, tvars)
+		tmplVars.GenerateType = "GenerateArticlesHTML"
+		err := htmlTemplate.Execute(articlesHTML, tmplVars)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -81,11 +76,9 @@ func main() {
 		for i, _ := range articles {
 			articleHTMLs[i] = new(bytes.Buffer)
 
-			var tvars templateVars
-			tvars.GenerateArticleHTML = true
-			tvars.Articles = articles
-			tvars.ArticleIndex = i
-			err := htmlTemplate.Execute(articleHTMLs[i], tvars)
+			tmplVars.GenerateType = "GenerateArticleHTML"
+			tmplVars.ArticleIndex = i
+			err := htmlTemplate.Execute(articleHTMLs[i], tmplVars)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -96,7 +89,7 @@ func main() {
 	mux := new(http.ServeMux)
 
 	redirectHTTPSMux.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "https://" + r.Host + r.URL.String(), http.StatusMovedPermanently)
+		http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
 	}))
 	mux.HandleFunc("/about", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, aboutHTML)
@@ -113,7 +106,7 @@ func main() {
 		}))
 	}
 	mux.HandleFunc("/favicon.png", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    http.ServeFile(w, r, "favicon.png")
+		http.ServeFile(w, r, "favicon.png")
 	}))
 	mux.Handle("/", http.RedirectHandler("/articles", http.StatusFound))
 

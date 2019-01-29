@@ -28,20 +28,16 @@
 	 	 grid-row-gap: 10px;
 	 	 grid-template-columns: 3fr 1fr;
 	 	 grid-template-areas: 
-	 	 "header header"
-	 	 "misc misc"
-	 	 "articles sidebar"
-	 	 "footer footer";
+	 	 "navigation navigation"
+	 	 "content sidebar"
 	 }
 	 @media (max-width: 500px) {
 		 .wrapper {
 		 	 grid-template-columns: 1fr;
 		 	 grid-template-areas:
-		 	 "header"
-		 	 "articles"
+		 	 "navigation"
+		 	 "content"
 		 	 "sidebar"
-		 	 "misc"
-		 	 "footer";
 		 }
 	 }
 	 @media (min-width: 1600px) {
@@ -69,36 +65,28 @@
 			 max-width: 1500px;
 		 }
 	 }
-	 .header {
-		 grid-area: header;
-		 border-bottom: 2px solid;
-
-		 display: grid;
-		 align-items: center;
-		 justify-content: center;
-	 }
-	 .misc {
-	 	 grid-area: misc;
+	 .navigation {
+	 	 grid-area: navigation;
 	 	 display: grid;
 	 	 grid-column-gap: 20px;
 	 	 grid-template-columns: 1fr 2fr 1fr;
 	 	 grid-template-areas: 
-	 	 "padding navigation search"
+	 	 "padding sections search"
 	 }
 	 @media (max-width: 500px) {
-		 .misc {
+		 .navigation {
 		 	 grid-row-gap: 20px;
 		 	 grid-template-columns: 1fr;
 		 	 grid-template-areas: 
-		 	 "navigation"
+		 	 "sections"
 		 	 "search";
 		 }
 	 }
 	 .sidebar {
 		 grid-area: sidebar;
 	 }
-	 .articles {
-		 grid-area: articles;
+	 .content {
+		 grid-area: content;
 	 }
 	 .a-no-decoration {
 		 text-decoration: none;
@@ -118,43 +106,39 @@
 	 	 padding-left: 60px;
 	 	 margin-left: .25em;
 	 }
-	 .header-logo {
-		 margin: 0 0 4px 0;
-		 font-size: 2em;
-	 }
-	 .navigation {
-	 	 grid-area: navigation;
+	 .sections {
+	 	 grid-area: sections;
 	 	 display: grid;
 	 	 grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 	 	 grid-template-areas: 
 	 	 "a a about contact github b b"
 	 }
-	 .navigation-text {
+	 .sections-text {
 	 	 margin: 0 0 0 0;
-	 	 font-size: 0.8em;
+	 	 font-size: 1em;
 	 	 text-align: center;
-	 	 height: 55%;
+	 	 height: 70%;
 	 }
 	 @media (max-width: 500px) {
-	 	 .navigation {
+	 	 .sections {
 	 	   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 	 	   grid-template-areas: 
 	 	   "a about contact github b"
 	 	 }
-		 .navigation-text {
+		 .sections-text {
 	 	   height: 100%;
 		 }
 	 }
-	 .navigation-text:hover {
+	 .sections-text:hover {
 	 	 background-color: #c6c6c6;
 	 }
-	 .navigation-about {
+	 .sections-about {
 	 	 grid-area: about;
 	 }
-	 .navigation-contact {
+	 .sections-contact {
 	 	 grid-area: contact;
 	 }
-	 .navigation-github {
+	 .sections-github {
 	 	 grid-area: github;
 	 }
 	 .search {
@@ -278,34 +262,20 @@
 
 <body>
 	<div class="wrapper">
-		<header class="header">
-			<a class="a-no-decoration" href="/">
-				<h1 class="header-logo">Game Dev Blog</h1>
-			</a>
-		</header>
 
-		<div class=misc>
-			<div class="navigation">
-			<a class="navigation-text navigation-about a-no-decoration" href="/about">About</a>
-			<a class="navigation-text navigation-contact a-no-decoration" href="/contact">Contact</a>
-			<a class="navigation-text navigation-github a-no-decoration" href="https://github.com/yngccc">Github</a>
+		<div class="navigation">
+			<div class="sections">
+				<a class="sections-text sections-about a-no-decoration" href="/about">About</a>
+				<a class="sections-text sections-contact a-no-decoration" href="/contact">Contact</a>
+				<a class="sections-text sections-github a-no-decoration" href="https://github.com/yngccc">Github</a>
 			</div>
 			<div class="search">
 				<form action="/blog/search">
 					<input type="text" class="search-input" placeholder="Search">
 				</form>
 			</div>
-		</div>
+		</div> <!-- navigation -->
 
-		{{if .GenerateAboutHTML}}
-			<div style="margin:0 auto; grid-area: footer">
-				Nothing to see here yet...
-			</div>
-		{{else if .GenerateContactHTML}}
-		<div style="margin:0 auto; grid-area: footer">
-			You can contact me at <a href="mailto:yngccc@gmail.com">yngccc@gmail.com</a>
-		</div>
-		{{else}}
 		<div class="sidebar">
 			<div class="sidebar-header">
 				<p class="sidebar-header-text">Recent Articles</p>
@@ -321,10 +291,19 @@
 					{{end}}
 				</ul>
 			</div>
-		</div>
+		</div> <!-- sidebar -->
 
-		<div class="articles">
-			{{if .GenerateArticlesHTML}}
+		<div class="content">
+			{{if eq .GenerateType "GenerateAboutHTML"}}
+			<div style="margin:0 auto; grid-area: footer">
+				Nothing to see here yet...
+			</div>
+			{{else if eq .GenerateType "GenerateContactHTML"}}
+			<div style="margin:0 auto; grid-area: footer">
+				You can contact me at <a href="mailto:yngccc@gmail.com">yngccc@gmail.com</a>
+			</div>
+			{{else}}
+			{{if eq .GenerateType "GenerateArticlesHTML"}}
 			{{range $i, $article := .Articles}}
 			{{if le $i 8}}
 			<div class=article>
@@ -341,7 +320,7 @@
 			</div>
 			{{end}}
 			{{end}}
-			{{else if .GenerateArticleHTML}}
+			{{else if eq .GenerateType "GenerateArticleHTML"}}
 			{{with $article := index .Articles .ArticleIndex}}
 			<div class=article>
 				<div class=article-title>
@@ -356,8 +335,9 @@
 			</div>
 			{{end}}
 			{{end}}
-		</div>
-		{{end}}
-	</div>
+			{{end}}
+		</div> <!-- content -->
+
+	</div> <!-- wrapper -->
 </body>	
 </html>
