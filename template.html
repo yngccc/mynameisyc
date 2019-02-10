@@ -2,18 +2,12 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
+
 	<link rel="shortcut icon" type="image/png" href="/favicon.png"/>
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-133286258-1"></script>
-	<script>
-		window.dataLayer = window.dataLayer || [];
-		function gtag(){dataLayer.push(arguments);}
-		gtag('js', new Date());
-		gtag('config', 'UA-133286258-1');
-	</script>	
 
 	<title>My Name is YC</title>
+
 	<style>
 	 * {
 		 box-sizing: border-box;
@@ -66,12 +60,13 @@
 		 }
 	 }
 	 .navigation {
-	 	 grid-area: navigation;
+		 margin-bottom: 10px;
 	 	 display: grid;
+	 	 grid-area: navigation;
 	 	 grid-column-gap: 20px;
-	 	 grid-template-columns: 1fr 2fr 1fr;
+	 	 grid-template-columns: 3fr 1fr;
 	 	 grid-template-areas: 
-	 	 "padding sections search"
+	 	 "sections search"
 	 }
 	 @media (max-width: 500px) {
 		 .navigation {
@@ -83,10 +78,12 @@
 		 }
 	 }
 	 .sidebar {
-		 grid-area: sidebar;
+			 grid-area: sidebar;
+			 margin-top: 20px;
 	 }
 	 .content {
 		 grid-area: content;
+		 margin-top: 20px;
 	 }
 	 .a-no-decoration {
 		 text-decoration: none;
@@ -109,28 +106,27 @@
 	 .sections {
 	 	 grid-area: sections;
 	 	 display: grid;
-	 	 grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+	 	 grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 	 	 grid-template-areas: 
-	 	 "a a about contact github b b"
+	 	 "a a home about contact github b b"
 	 }
 	 .sections-text {
-	 	 margin: 0 0 0 0;
 	 	 font-size: 1em;
 	 	 text-align: center;
-	 	 height: 70%;
+		 align-self: center;
 	 }
 	 @media (max-width: 500px) {
 	 	 .sections {
 	 	   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
 	 	   grid-template-areas: 
-	 	   "a about contact github b"
+	 	   "a home about contact github a"
 	 	 }
-		 .sections-text {
-	 	   height: 100%;
-		 }
 	 }
 	 .sections-text:hover {
 	 	 background-color: #c6c6c6;
+	 }
+	 .sections-home {
+	 	 grid-area: home;
 	 }
 	 .sections-about {
 	 	 grid-area: about;
@@ -155,11 +151,9 @@
      box-shadow: 0 0 3pt 2pt #535959;
 	 }
 	 .sidebar-header {
-	 	 width: 90%;
-	 	 margin: 1.15em auto;
+	 	 width: 100%;
 	 	 border-bottom: 2px solid;
 	 	 margin-bottom: 10px;
-
  	 	 display: grid;
 	 	 align-items: center;
 	 	 justify-content: center;
@@ -181,13 +175,12 @@
 	 .article-title {
 	 	 width: 100%;
 	 	 border-bottom: 2px solid;
-	 	 margin-bottom: 4px;
+	 	 margin-bottom: 10px;
 	 }
 	 .article-title-text {
-	 	 margin-top: 0;
-	 	 margin-bottom: 0;
-		 font-size: 2em;
-		 font-weight: bold;
+	 	 margin: 0 0 3px 0;
+	 	 font-size: 1em;
+	 	 font-weight: bold;
    }
 	 .article-create-time {
 	 	 display: grid;
@@ -265,12 +258,13 @@
 
 		<div class="navigation">
 			<div class="sections">
+				<a class="sections-text sections-home a-no-decoration" href="/">Home</a>
 				<a class="sections-text sections-about a-no-decoration" href="/about">About</a>
 				<a class="sections-text sections-contact a-no-decoration" href="/contact">Contact</a>
 				<a class="sections-text sections-github a-no-decoration" href="https://github.com/yngccc">Github</a>
 			</div>
 			<div class="search">
-				<form action="/blog/search">
+				<form action="/search">
 					<input type="text" class="search-input" placeholder="Search">
 				</form>
 			</div>
@@ -285,7 +279,7 @@
 					{{range $i, $a := .Articles}}
 					{{if lt $i 8}}
 					<li>
-						<a class="sidebar-link a-no-decoration" href="/blog/{{$a.ID}}"><div>{{$a.Title}}</div></a>
+						<a class="sidebar-link a-no-decoration" href="/articles/{{$a.ID}}"><div>{{$a.Title}}</div></a>
 					</li>
 					{{end}}
 					{{end}}
@@ -302,42 +296,25 @@
 			<div style="margin:0 auto; grid-area: footer">
 				You can contact me at <a href="mailto:yngccc@gmail.com">yngccc@gmail.com</a>
 			</div>
-			{{else}}
-			{{if eq .GenerateType "GenerateArticlesHTML"}}
-			{{range $i, $article := .Articles}}
-			{{if le $i 8}}
-			<div class=article>
-				<div class=article-title>
-					<a class="a-no-decoration" href="/blog/{{.ID}}">
-						<p class="article-title-text">{{$article.Title}}</p>
-					</a>
-				</div>
-				<div class="article-create-time">
-					<p class="article-create-time-text">{{$article.CreationTime.Format "Jan 2, 2006"}}</p>
-				</div>
-				<div class="article-text article-text-max-height">{{$article.Body}}</div>
-				<a class="go-to-article a-no-decoration" href="/blog/{{.ID}}">Read in Full  →</a>
-			</div>
-			{{end}}
-			{{end}}
 			{{else if eq .GenerateType "GenerateArticleHTML"}}
 			{{with $article := index .Articles .ArticleIndex}}
 			<div class=article>
 				<div class=article-title>
-					<a class="a-no-decoration" href="/blog/{{.ID}}">
+					<a class="a-no-decoration" href="/articles/{{.ID}}">
 						<p class="article-title-text">{{$article.Title}}</p>
 					</a>
 				</div>
 				<div class="article-create-time">
-					<p class="article-create-time-text">{{$article.CreationTime.Format "Jan 2, 2006"}}</p>
+					<p class="article-create-time-text">{{$article.CreateTime.Format "Jan 2, 2006"}}</p>
 				</div>
-				<div class="article-text">{{$article.Body}}</div>
+				<div class="article-text">{{$article.Content}}</div>
 			</div>
-			{{end}}
 			{{end}}
 			{{end}}
 		</div> <!-- content -->
 
 	</div> <!-- wrapper -->
-</body>	
+
+	{{template "script"}}
+</body>
 </html>

@@ -5,9 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -19,11 +22,11 @@ func min(a, b int) int {
 }
 
 type article struct {
-	CreationTime time.Time
-	UpdateTime   time.Time
-	Title        string
-	Body         template.HTML
-	ID           int
+	Title      string
+	CreateTime time.Time
+	UpdateTime time.Time
+	Content    template.HTML
+	ID         int
 }
 
 type templateVars struct {
@@ -39,8 +42,46 @@ func main() {
 	flag.Parse()
 
 	articles := make([]article, 0, 256)
+	{
+		files, err := ioutil.ReadDir(".")
+		if err != nil {
+			log.Fatal(err)
+		}
+		ID := 1
+		for _, file := range files {
+			fileName := file.Name()
+			if strings.HasPrefix(fileName, "article_") {
+				fileBytes, err := ioutil.ReadFile(fileName)
+				if err != nil {
+					log.Fatal(err)
+				}
+				str := string(fileBytes[:])
+				str = strings.Replace(str, "\r\n", "\n", -1)
+				strs := strings.SplitN(str, "\n", 4)
+				if len(strs) != 4 {
+					log.Fatal("")
+				}
+				timeLayout := "Jan 2, 2006"
+				article := article{}
+				article.ID = ID
+				ID += 1
+				article.Title = strs[0]
+				article.CreateTime, err = time.Parse(timeLayout, strs[1])
+				if err != nil {
+					log.Fatal(err)
+				}
+				article.UpdateTime, err = time.Parse(timeLayout, strs[2])
+				if err != nil {
+					log.Fatal(err)
+				}
+				article.Content = template.HTML(strs[3])
+				articles = append(articles, article)
+			}
+		}
+		sort.Slice(articles, func(i, j int) bool { return articles[i].CreateTime.After(articles[j].CreateTime) })
+	}
 
-	htmlTemplate, err := template.New("template.html").ParseFiles("template.html")
+	htmlTemplate, err := template.New("template.html").ParseFiles("script.html", "template.html")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,19 +104,10 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	articlesHTML := new(bytes.Buffer)
-	{
-		tmplVars.GenerateType = "GenerateArticlesHTML"
-		err := htmlTemplate.Execute(articlesHTML, tmplVars)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 	articleHTMLs := make([]*bytes.Buffer, len(articles), len(articles))
 	{
 		for i, _ := range articles {
 			articleHTMLs[i] = new(bytes.Buffer)
-
 			tmplVars.GenerateType = "GenerateArticleHTML"
 			tmplVars.ArticleIndex = i
 			err := htmlTemplate.Execute(articleHTMLs[i], tmplVars)
@@ -91,24 +123,23 @@ func main() {
 	redirectHTTPSMux.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://"+r.Host+r.URL.String(), http.StatusMovedPermanently)
 	}))
+	mux.HandleFunc("/favicon.png", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "favicon.png")
+	}))
 	mux.HandleFunc("/about", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, aboutHTML)
 	}))
 	mux.HandleFunc("/contact", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, contactHTML)
 	}))
-	mux.HandleFunc("/articles", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, articlesHTML)
-	}))
 	for i, article := range articles {
 		mux.HandleFunc("/articles/"+strconv.Itoa(article.ID), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, articleHTMLs[i])
 		}))
 	}
-	mux.HandleFunc("/favicon.png", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "favicon.png")
+	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, articleHTMLs[0])
 	}))
-	mux.Handle("/", http.RedirectHandler("/articles", http.StatusFound))
 
 	makeServer := func(mux *http.ServeMux) http.Server {
 		return http.Server{
