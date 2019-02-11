@@ -307,7 +307,7 @@
 				<div class="article-create-time">
 					<p class="article-create-time-text">{{$article.CreateTime.Format "Jan 2, 2006"}}</p>
 				</div>
-				<div class="article-text">{{$article.Content}}</div>
+				<div class="article-text">{{$article.HTML}}</div>
 			</div>
 			{{end}}
 			{{end}}
@@ -316,5 +316,12 @@
 	</div> <!-- wrapper -->
 
 	{{template "script"}}
+
+	{{if eq .GenerateType "GenerateArticleHTML"}}
+	{{with $article := index .Articles .ArticleIndex}}
+	{{$article.Javascript}}
+	{{end}}
+	{{end}}
+	
 </body>
 </html>

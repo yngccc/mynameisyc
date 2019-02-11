@@ -22,11 +22,12 @@ func min(a, b int) int {
 }
 
 type article struct {
+	ID         int
 	Title      string
 	CreateTime time.Time
 	UpdateTime time.Time
-	Content    template.HTML
-	ID         int
+	HTML       template.HTML
+	Javascript template.HTML
 }
 
 type templateVars struct {
@@ -57,9 +58,12 @@ func main() {
 				}
 				str := string(fileBytes[:])
 				str = strings.Replace(str, "\r\n", "\n", -1)
-				strs := strings.SplitN(str, "\n", 4)
-				if len(strs) != 4 {
+				strs := strings.SplitN(str, "---separator---", -1)
+				if len(strs) != 5 {
 					log.Fatal("")
+				}
+				for i, _ := range strs {
+					strs[i] = strings.TrimSpace(strs[i])
 				}
 				timeLayout := "Jan 2, 2006"
 				article := article{}
@@ -74,7 +78,8 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				article.Content = template.HTML(strs[3])
+				article.HTML = template.HTML(strs[3])
+				article.Javascript = template.HTML(strs[4])
 				articles = append(articles, article)
 			}
 		}
@@ -133,8 +138,9 @@ func main() {
 		fmt.Fprint(w, contactHTML)
 	}))
 	for i, article := range articles {
+		articleHTML := articleHTMLs[i]
 		mux.HandleFunc("/articles/"+strconv.Itoa(article.ID), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprint(w, articleHTMLs[i])
+			fmt.Fprint(w, articleHTML)
 		}))
 	}
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -10,7 +10,91 @@
 </script>
 
 <script>
+	function deg_to_rad(deg) {
+		return deg * Math.PI / 180;
+	};
 	
+	function vec3_eq(v1, v2) {
+		return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] == v2[2];
+	};
+	
+	function vec3_add(v1, v2) {
+		v1[0] += v2[0];
+		v1[1] += v2[1];
+		v1[2] += v2[2];
+		return v1;
+	};
+
+	function vec3_sub(v1, v2) {
+		v1[0] -= v2[0];
+		v1[1] -= v2[1];
+		v1[2] -= v2[2];
+		return v1;
+	};
+
+	function vec3_normalize(v) {
+		var len = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+		v[0] /= len;
+		v[1] /= len;
+		v[2] /= len;
+		return v;
+	};
+
+	function vec3_dot(v1, v2) {
+		return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+	};
+
+	function vec3_cross(v1, v2) {
+		return [v1[1] * v2[2] - v2[1] * v1[2],
+						v1[2] * v2[0] - v2[2] * v1[0],
+						v1[0] * v2[1] - v2[0] * v1[1]];
+	};
+	
+	function mat4_identity() {
+		var mat = new Array(16).fill(0);
+		mat[0] = 1;
+		mat[5] = 1;
+		mat[10] = 1;
+		mat[15] = 1;
+		return mat;
+	};
+	
+	function mat4_view(eye, center) {
+		var up = [0, 1, 0];
+		var f = vec3_normalize(vec3_sub(center, eye));
+		if (vec3_eq(f, up) || vec3_eq(f, -up)) {
+			f[0] -= 0.000001;
+			f = vec3_normalize(f);
+		}
+		var s = vec3_normalize(vec3_cross(f, up));
+		var u = vec3_cross(s, f);
+		var mat = new Array(16).fill(0);
+		mat[0] = s[0];
+		mat[1] = u[0];
+		mat[2] = -f[0];
+		mat[4] = s[1];
+		mat[5] = u[1];
+		mat[6] = -f[1];
+		mat[8] = s[2];
+		mat[9] = u[2];
+		mat[10] = -f[2];
+		mat[12] = -vec3_dot(s, eye);
+		mat[13] = -vec3_dot(u, eye);
+		mat[14] = vec3_dot(f, eye);
+		mat[15] = 1;
+		return mat;
+	};
+
+	function mat4_perspective(fovy, aspect, znear, zfar) {
+		var mat = new Array(16).fill(0);
+		var f = 1 / Math.tan(fovy / 2);
+		mat[0] = f / aspect;
+		mat[5] = f;
+		mat[10] = (zfar + znear) / (znear - zfar);
+		mat[11] = -1;
+		mat[14] = (2 * zfar * znear) / (znear - zfar);
+		return mat;
+	};
 </script>
 
 {{end}}
