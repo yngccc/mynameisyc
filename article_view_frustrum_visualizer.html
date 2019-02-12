@@ -1,0 +1,226 @@
+View Frustrum visualizer
+---separator---
+Feb 9, 2019
+---separator---
+Feb 9, 2019
+---separator---
+
+<style>
+</style>
+
+---separator---
+
+<p> View Frustrum visualizer </p>
+<canvas id="canvas" width="640" height="480"></canvas>
+
+<div>
+	Aspect Ratio:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+  <select id="aspect-ratio">
+    <option value="4:3">4:3</option>
+    <option value="16:9" selected="selected">16:9</option>
+    <option value="21:9">21:9</option>
+  </select>
+</div>
+<div>
+	Horizontal FoV:&nbsp&nbsp
+	<input id="horizontal-fov" type="number" value="60">
+</div>
+
+---separator---
+
+<script>
+	function main() {
+		var canvas = document.querySelector("#canvas");
+
+		function parse_aspect_ratio(aspect_ratio) {
+			if (aspect_ratio === "4:3") {
+				return 4/3;
+			}
+			else if (aspect_ratio === "16:9") {
+				return 16/9;
+			}
+			else if (aspect_ratio === "21:9") {
+				return 21/9;
+			}
+			return 1;
+		}
+		
+		var aspect_ratio_elem = document.getElementById("aspect-ratio");
+		var horizontal_fov_elem = document.getElementById("horizontal-fov");
+		var aspect_ratio = parse_aspect_ratio(aspect_ratio_elem.options[aspect_ratio_elem.selectedIndex].value);
+		var horizontal_fov = deg_to_rad(parseInt(horizontal_fov_elem.value));
+		aspect_ratio_elem.addEventListener("change", function() {
+			aspect_ratio = parse_aspect_ratio(aspect_ratio_elem.options[aspect_ratio_elem.selectedIndex].value);
+		});
+		horizontal_fov_elem.addEventListener("change", function() {
+			horizontal_fov = deg_to_rad(parseInt(horizontal_fov_elem.value));
+		});
+				
+		var mouse_state = {
+			down: false,
+			drag_x: 0,
+			drag_y: 0,
+			prev_x: 0,
+			prev_y: 0
+		};
+		
+		canvas.addEventListener("mouseenter", function(event) {
+			mouse_state.down = (event.buttons === 1);
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+		canvas.addEventListener("mouseleave", function(event) {
+		});
+		canvas.addEventListener("mousemove", function(event) {
+			if (mouse_state.down) {
+				mouse_state.drag_x += event.clientX - mouse_state.prev_x;
+				mouse_state.drag_y += event.clientY - mouse_state.prev_y;
+				mouse_state.prev_x = event.clientX;
+				mouse_state.prev_y = event.clientY;
+			}
+		});
+		canvas.addEventListener("mousedown", function(event) {
+			mouse_state.down = true;
+			mouse_state.drag_x = 0;
+			mouse_state.drag_y = 0;
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+		canvas.addEventListener("mouseup", function(event) {
+			mouse_state.down = false;
+			mouse_state.drag_x = 0;
+			mouse_state.drag_y = 0;
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+
+		var gl = canvas.getContext("webgl");
+		if (gl === null) {
+			alert("Unable to initialize WebGL. Your browser or machine may not support it.");
+			return;
+		}
+		
+		var vert_shader_src = `
+      attribute vec3 position;
+      uniform mat4 model_mat;
+      uniform mat4 view_mat;
+      uniform mat4 proj_mat;
+      void main() {
+        gl_Position = proj_mat * view_mat * model_mat * vec4(position, 1);
+      }
+    `;
+
+		var frag_shader_src = `
+      void main() {
+        gl_FragColor = vec4(1, 1, 1, 1);
+      }
+    `;
+
+		var vert_shader = gl.createShader(gl.VERTEX_SHADER);
+		var frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(vert_shader, vert_shader_src);
+		gl.shaderSource(frag_shader, frag_shader_src);
+		gl.compileShader(vert_shader);
+		gl.compileShader(frag_shader);
+		console.log("vert_shader status: " + gl.getShaderInfoLog(vert_shader));
+		console.log("frag_shader status: " + gl.getShaderInfoLog(frag_shader));
+
+		var shader = gl.createProgram();
+		gl.attachShader(shader, vert_shader);
+		gl.attachShader(shader, frag_shader);
+		gl.linkProgram(shader);
+		console.log("shader status: " + gl.getProgramInfoLog(shader));
+
+		var shader_info = {
+			position : gl.getAttribLocation(shader, "position"),
+			model_mat : gl.getUniformLocation(shader, 'model_mat'),
+			view_mat : gl.getUniformLocation(shader, 'view_mat'),
+			proj_mat : gl.getUniformLocation(shader, 'proj_mat'),
+		};
+
+		
+		var frustum = get_frustum_corners(horizontal_fov, aspect_ratio, 1, 10);
+		var points = new Array(24).fill([0, 0, 0]);
+		points[0] = frustum[0];
+		points[1] = frustum[1];
+		points[2] = frustum[1];
+		points[3] = frustum[3];
+		points[4] = frustum[3];
+		points[5] = frustum[2];
+		points[6] = frustum[2];
+		points[7] = frustum[0];
+
+		points[8] = frustum[4];
+		points[9] = frustum[5];
+		points[10] = frustum[5];
+		points[11] = frustum[7];
+		points[12] = frustum[7];
+		points[13] = frustum[6];
+		points[14] = frustum[6];
+		points[15] = frustum[4];
+		
+		points[16] = frustum[0];
+		points[17] = frustum[4];
+		points[18] = frustum[1];
+		points[19] = frustum[5];
+		points[20] = frustum[2];
+		points[21] = frustum[6];
+		points[22] = frustum[3];
+		points[23] = frustum[7];
+		
+		var positions = new Array(24 * 3).fill(0);
+		for (i = 0; i < 24; i += 1) {
+			positions[i * 3 + 0] = points[i][0];
+			positions[i * 3 + 1] = points[i][1];
+			positions[i * 3 + 2] = points[i][2];
+		}
+
+		var position_buffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+		var min_frame_time = 16.0;
+		var then = performance.now();
+		var translate = [0, 0, 0];
+		var translate_sensitivity = 2;
+
+		function render(now) {
+			var dt = now - then;
+			if (dt >= min_frame_time) {
+				then = now;
+
+				translate[0] += mouse_state.drag_x / canvas.width * translate_sensitivity;
+				translate[1] -= mouse_state.drag_y / canvas.height * translate_sensitivity;
+				translate[0] = clamp(translate[0], -1, 1)
+				translate[1] = clamp(translate[1], -1, 1)
+				mouse_state.drag_x = 0;
+				mouse_state.drag_y = 0;
+
+				var model_mat = mat4_translate(translate);
+				var view_mat = mat4_view([10, 10, 5], [0, 0, -10]);
+				var fovy = deg_to_rad(45);
+				var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+				var proj_mat = mat4_perspective(fovy, aspect, 0.1, 100);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
+				gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(shader_info.position);
+				
+				gl.clearColor(0, 0, 0, 1);
+				gl.clearDepth(1);
+				gl.enable(gl.DEPTH_TEST);
+				gl.depthFunc(gl.LEQUAL);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+				gl.useProgram(shader);
+				gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
+				gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
+				gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
+				gl.drawArrays(gl.LINES, 0, 24);
+			}
+			requestAnimationFrame(render);
+		};
+		requestAnimationFrame(render);
+	};
+	main();
+</script>
