@@ -22,26 +22,21 @@
 		return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] == v2[2];
 	};
 	
+	function vec3_scale(v, n) {
+		return [v[0] * n, v[1] * n, v[2] * n];
+	};
+
 	function vec3_add(v1, v2) {
-		v1[0] += v2[0];
-		v1[1] += v2[1];
-		v1[2] += v2[2];
-		return v1;
+		return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]];
 	};
 
 	function vec3_sub(v1, v2) {
-		v1[0] -= v2[0];
-		v1[1] -= v2[1];
-		v1[2] -= v2[2];
-		return v1;
+		return [v1[0] - v2[0], v1[1] - v2[1], v1[2] - v2[2]];
 	};
 
 	function vec3_normalize(v) {
 		var len = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-		v[0] /= len;
-		v[1] /= len;
-		v[2] /= len;
-		return v;
+		return [v[0] / len, v[1] / len, v[2] / len];
 	};
 
 	function vec3_dot(v1, v2) {
@@ -52,6 +47,40 @@
 		return [v1[1] * v2[2] - v2[1] * v1[2],
 						v1[2] * v2[0] - v2[2] * v1[0],
 						v1[0] * v2[1] - v2[0] * v1[1]];
+	};
+
+	function vec4_add(v1, v2) {
+		return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2], v1[3] + v2[3]]
+	};
+
+	function vec4_scale(v, n) {
+		return [v[0] * n, v[1] * n, v[2] * n, v[3] * n];
+	};
+	
+	function mat4_mult(m1, m2) {
+		var m1_c1 = m1.slice(0, 4);
+		var m1_c2 = m1.slice(4, 8);
+		var m1_c3 = m1.slice(8, 12);
+		var m1_c4 = m1.slice(12, 16);
+
+		var m2_c1 = m2.slice(0, 4);
+		var m2_c2 = m2.slice(4, 8);
+		var m2_c3 = m2.slice(8, 12);
+		var m2_c4 = m2.slice(12, 16);
+		
+		var m_c1 = vec4_add(vec4_add(vec4_add(vec4_scale(m1_c1, m2_c1[0]), vec4_scale(m1_c2, m2_c1[1])), vec4_scale(m1_c3, m2_c1[2])), vec4_scale(m1_c4, m2_c1[3]));
+		var m_c2 = vec4_add(vec4_add(vec4_add(vec4_scale(m1_c1, m2_c2[0]), vec4_scale(m1_c2, m2_c2[1])), vec4_scale(m1_c3, m2_c2[2])), vec4_scale(m1_c4, m2_c2[3]));
+		var m_c3 = vec4_add(vec4_add(vec4_add(vec4_scale(m1_c1, m2_c3[0]), vec4_scale(m1_c2, m2_c3[1])), vec4_scale(m1_c3, m2_c3[2])), vec4_scale(m1_c4, m2_c3[3]));
+		var m_c4 = vec4_add(vec4_add(vec4_add(vec4_scale(m1_c1, m2_c4[0]), vec4_scale(m1_c2, m2_c4[1])), vec4_scale(m1_c3, m2_c4[2])), vec4_scale(m1_c4, m2_c4[3]));
+
+		var m = new Array(16).fill(0);
+		for (i = 0; i < 4; i += 1) {
+			m[0 + i] = m_c1[i];
+			m[4 + i] = m_c2[i];
+			m[8 + i] = m_c3[i];
+			m[12 + i] = m_c4[i];
+		}
+		return m;
 	};
 	
 	function mat4_identity() {
@@ -107,6 +136,33 @@
 		mat[14] = (2 * zfar * znear) / (znear - zfar);
 		return mat;
 	};
+
+	function get_frustum_corners(fovy, aspect, znear, zfar) {
+		var near_height = 2 * Math.tan(fovy / 2) * znear;
+		var near_width = near_height * aspect;
+		var far_height = 2 * Math.tan(fovy / 2) * zfar;
+		var far_width = far_height * aspect;
+		var near_center = vec3_scale([0, 0, -1], znear);
+		var far_center = vec3_scale([0, 0, -1], zfar);
+		var near_up = vec3_scale([0, 1, 0], near_height * 0.5);
+		var near_right = vec3_scale([1, 0, 0], near_width * 0.5);
+		var far_up = vec3_scale([0, 1, 0], far_height * 0.5);
+		var far_right = vec3_scale([1, 0, 0], far_width * 0.5);
+		
+		var near_top_left = vec3_sub(vec3_add(near_center, near_up), near_right);
+		var near_top_right = vec3_add(vec3_add(near_center, near_up), near_right);
+		var near_bottom_left = vec3_sub(vec3_sub(near_center, near_up), near_right);
+		var near_bottom_right = vec3_add(vec3_sub(near_center, near_up), near_right);
+
+		var far_top_left = vec3_sub(vec3_add(far_center, far_up), far_right);
+		var far_top_right = vec3_add(vec3_add(far_center, far_up), far_right);
+		var far_bottom_left = vec3_sub(vec3_sub(far_center, far_up), far_right);
+		var far_bottom_right = vec3_add(vec3_sub(far_center, far_up), far_right);
+
+		return [near_top_left, near_top_right, near_bottom_left, near_bottom_right,
+						far_top_left, far_top_right, far_bottom_left, far_bottom_right];
+	};
+	
 </script>
 
 {{end}}
