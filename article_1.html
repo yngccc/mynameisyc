@@ -1,18 +1,75 @@
-Test article 1
+View Frustrum visualizer
 ---separator---
 Feb 9, 2019
 ---separator---
 Feb 9, 2019
 ---separator---
 
-<p> This is test article 1 </p>
+<style>
+</style>
+
+---separator---
+
+<p> View Frustrum visualizer </p>
 <canvas id="canvas" width="640" height="480"></canvas>
+
+<div>
+	Aspect Ratio:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+  <select id="aspect-ratio">
+    <option value="4:3">4:3</option>
+    <option value="16:9">16:9</option>
+    <option value="21:9">21:9</option>
+  </select>
+</div>
+<div>
+	Horizontal FoV:&nbsp&nbsp
+	<input id="horizontal-fov" type="number">
+</div>
 
 ---separator---
 
 <script>
 	function main() {
 		var canvas = document.querySelector("#canvas");
+
+		var mouse_state = {
+			down: false,
+			drag_x: 0,
+			drag_y: 0,
+			prev_x: 0,
+			prev_y: 0
+		};
+		
+		canvas.addEventListener("mouseenter", function(event) {
+			mouse_state.down = (event.buttons === 1);
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+		canvas.addEventListener("mouseleave", function(event) {
+		});
+		canvas.addEventListener("mousemove", function(event) {
+			if (mouse_state.down) {
+				mouse_state.drag_x += event.clientX - mouse_state.prev_x;
+				mouse_state.drag_y += event.clientY - mouse_state.prev_y;
+				mouse_state.prev_x = event.clientX;
+				mouse_state.prev_y = event.clientY;
+			}
+		});
+		canvas.addEventListener("mousedown", function(event) {
+			mouse_state.down = true;
+			mouse_state.drag_x = 0;
+			mouse_state.drag_y = 0;
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+		canvas.addEventListener("mouseup", function(event) {
+			mouse_state.down = false;
+			mouse_state.drag_x = 0;
+			mouse_state.drag_y = 0;
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+
 		var gl = canvas.getContext("webgl");
 		if (gl === null) {
 			alert("Unable to initialize WebGL. Your browser or machine may not support it.");
@@ -72,17 +129,27 @@ Feb 9, 2019
 		var colors = [1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1];
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
+		var min_frame_time = 16.0;
 		var then = performance.now();
+		var translate = [0, 0, 0];
+		var translate_sensitivity = 2;
+
 		function render(now) {
-			var min_frame_time = 16.0;
 			var dt = now - then;
 			if (dt >= min_frame_time) {
 				then = now;
 
+				translate[0] += mouse_state.drag_x / canvas.width * translate_sensitivity;
+				translate[1] -= mouse_state.drag_y / canvas.height * translate_sensitivity;
+				translate[0] = clamp(translate[0], -1, 1)
+				translate[1] = clamp(translate[1], -1, 1)
+				mouse_state.drag_x = 0;
+				mouse_state.drag_y = 0;
+
+				var model_mat = mat4_translate(translate);
+				var view_mat = mat4_view([0, 0, 5], [0, 0, 0]);
 				var fov = deg_to_rad(45);
 				var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-				var model_mat = mat4_identity();
-				var view_mat = mat4_view([0, 0, 5], [0, 0, 0]);
 				var proj_mat = mat4_perspective(fov, aspect, 0.1, 100);
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
@@ -93,7 +160,7 @@ Feb 9, 2019
 				gl.vertexAttribPointer(shader_info.color, 3, gl.FLOAT, false, 0, 0);
 				gl.enableVertexAttribArray(shader_info.color);
 				
-				gl.clearColor(1, 1, 1, 1);
+				gl.clearColor(0, 0, 0, 1);
 				gl.clear(gl.COLOR_BUFFER_BIT);
 
 				gl.useProgram(shader);

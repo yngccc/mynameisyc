@@ -9,253 +9,198 @@
 	<title>My Name is YC</title>
 
 	<style>
-	 * {
-		 box-sizing: border-box;
-	 }
-	 .wrapper {
-		 max-width: 1000px;
-		 margin: 0 auto;
-		 font-family: 'Open Sans', Arial;
+		* {
+				box-sizing: border-box;
+		}
+		.wrapper {
+				max-width: 1000px;
+				margin: 0 auto;
+				font-family: 'Open Sans', Arial;
 
-		 display: grid;
-		 grid-column-gap: 20px;
-	 	 grid-row-gap: 10px;
-	 	 grid-template-columns: 3fr 1fr;
-	 	 grid-template-areas: 
-	 	 "navigation navigation"
-	 	 "content sidebar"
-	 }
-	 @media (max-width: 500px) {
-		 .wrapper {
-		 	 grid-template-columns: 1fr;
-		 	 grid-template-areas:
-		 	 "navigation"
-		 	 "content"
-		 	 "sidebar"
-		 }
-	 }
-	 @media (min-width: 1600px) {
-		 .wrapper {
-			 max-width: 1100px;
-		 }
-	 }
-	 @media (min-width: 1700px) {
-		 .wrapper {
-			 max-width: 1200px;
-		 }
-	 }
-	 @media (min-width: 1800px) {
-		 .wrapper {
-			 max-width: 1300px;
-		 }
-	 }
-	 @media (min-width: 1900px) {
-		 .wrapper {
-			 max-width: 1400px;
-		 }
-	 }
-	 @media (min-width: 2000px) {
-		 .wrapper {
-			 max-width: 1500px;
-		 }
-	 }
-	 .navigation {
-		 margin-bottom: 10px;
-	 	 display: grid;
-	 	 grid-area: navigation;
-	 	 grid-column-gap: 20px;
-	 	 grid-template-columns: 3fr 1fr;
-	 	 grid-template-areas: 
-	 	 "sections search"
-	 }
-	 @media (max-width: 500px) {
-		 .navigation {
-		 	 grid-row-gap: 20px;
-		 	 grid-template-columns: 1fr;
-		 	 grid-template-areas: 
-		 	 "sections"
-		 	 "search";
-		 }
-	 }
-	 .sidebar {
-			 grid-area: sidebar;
-			 margin-top: 20px;
-	 }
-	 .content {
-		 grid-area: content;
-		 margin-top: 20px;
-	 }
-	 .a-no-decoration {
-		 text-decoration: none;
-		 color: black;
-	 }
-	 ::placeholder {
-	 	 color: black;
-	 }
-	 .form-field {
-		 margin-bottom: 4px;
-	 }
-	 .form-label {
-		 display: inline-block;
-		 width: 60px;
-	 }
-	 .form-submit-button {
-	 	 padding-left: 60px;
-	 	 margin-left: .25em;
-	 }
-	 .sections {
-	 	 grid-area: sections;
-	 	 display: grid;
-	 	 grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-	 	 grid-template-areas: 
-	 	 "a a home about contact github b b"
-	 }
-	 .sections-text {
-	 	 font-size: 1em;
-	 	 text-align: center;
-		 align-self: center;
-	 }
-	 @media (max-width: 500px) {
-	 	 .sections {
-	 	   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-	 	   grid-template-areas: 
-	 	   "a home about contact github a"
-	 	 }
-	 }
-	 .sections-text:hover {
-	 	 background-color: #c6c6c6;
-	 }
-	 .sections-home {
-	 	 grid-area: home;
-	 }
-	 .sections-about {
-	 	 grid-area: about;
-	 }
-	 .sections-contact {
-	 	 grid-area: contact;
-	 }
-	 .sections-github {
-	 	 grid-area: github;
-	 }
-	 .search {
-	 	 grid-area: search;
-	 }
-	 .search-input {
-		 width: 100%;
-		 border-radius: 8px;
-		 border: 1px solid #e6ecf0;
-		 padding: 8px 12px 8px 12px;
-	 }
-	 .search-input:focus{
-		 outline: 0;
-     box-shadow: 0 0 3pt 2pt #535959;
-	 }
-	 .sidebar-header {
-	 	 width: 100%;
-	 	 border-bottom: 2px solid;
-	 	 margin-bottom: 10px;
- 	 	 display: grid;
-	 	 align-items: center;
-	 	 justify-content: center;
-	 }
-	 .sidebar-header-text {
-	 	 margin: 0 0 3px 0;
-	 	 font-size: 1em;
-	 	 font-weight: bold;
-	 }
-	 .sidebar-links {
-     width: 100%;
-     margin: 0 auto;
-	 }
-	 .sidebar-link {
-	 	 text-align: center;
-		 align-self: center;
-	 }
-	 .sidebar-link:hover {
-		 text-decoration: underline;
-	 }
-	 .article {
-	 	 margin-bottom: 40px;
-	 }
-	 .article-title {
-	 	 width: 100%;
-	 	 border-bottom: 2px solid;
-	 	 margin-bottom: 10px;
-	 }
-	 .article-title-text {
-	 	 margin: 0 0 3px 0;
-	 	 font-size: 1em;
-	 	 font-weight: bold;
-   }
-	 .article-create-time {
-	 	 display: grid;
-	 	 grid-template-columns: 5fr 1fr;
-	 	 grid-template-areas: 
-	 	 "padding time";
-	 }
-	 .article-create-time-text {
-		 margin: 0 0 0 0;
-		 grid-area: time;
-		 align-self: center;
-		 justify-self: center;
-	 }
-	 .article-text {
-		 margin: 0 0 0 0;
-		 line-height: 2;
-	 }
-	 .article-text-max-height {
-		 max-height: 300px;
-		 overflow: hidden;
-	 }
-	 .go-to-article {
-  	 display: inline-block;
-	 	 padding: 10px 10px 10px 10px;
-	 	 margin-top: 16px;
-	 	 background-color: #e8e8e8;
-	 }
-	 .comments {
-		 padding-top: 15px;
-		 border-top: 2px solid;
-	 }
-	 .comment-form-name {
-	 	 width: 300px;
-	 }
-	 .comment-form-email {
-	 	 width: 300px;
-	 }
-	 .comment-form-text {
-	 	 width: 300px;
-		 vertical-align: top;
-		 height: 6em;
-	 }
-	 .comment-count {
-	 	  margin-top: 20px;
-	 	  text-align: right;
-	 	  font-weight: bold;
-	 	}
-	 .comment {
-	 }
-	 .comment-header {
-	 	 background-color: #e8e8e8;
-	 	 display: flex;
-	 }
-	 .comment-image {
-	 }
-	 .comment-name {
-		 margin: 0 0 0 10px;
-		 font-weight: bold;
-		 align-self: center;
-		 justify-self: center;
-	 }
-	 .comment-create-time {
-		 margin: 0 0 0 10px;
-		 align-self: center;
-		 justify-self: center;
-		 font-size: 0.75em;
-	 }
-	 .comment-text {
-	 }
+				display: grid;
+				grid-column-gap: 20px;
+	 			grid-row-gap: 10px;
+	 			grid-template-columns: 3fr 1fr;
+	 			grid-template-areas: "navigation navigation"
+	 													 "content sidebar"
+		}
+		@media (max-width: 500px) {
+				.wrapper {
+		 				grid-template-columns: 1fr;
+		 				grid-template-areas: "navigation"
+		 														 "content"
+		 														 "sidebar"
+				}
+		}
+		@media (min-width: 1600px) {
+				.wrapper {
+						max-width: 1100px;
+				}
+		}
+		@media (min-width: 1700px) {
+				.wrapper {
+						max-width: 1200px;
+				}
+		}
+		@media (min-width: 1800px) {
+				.wrapper {
+						max-width: 1300px;
+				}
+		}
+		@media (min-width: 1900px) {
+				.wrapper {
+						max-width: 1400px;
+				}
+		}
+		@media (min-width: 2000px) {
+				.wrapper {
+						max-width: 1500px;
+				}
+		}
+		.navigation {
+				margin-bottom: 10px;
+	 			display: grid;
+	 			grid-area: navigation;
+	 			grid-column-gap: 20px;
+	 			grid-template-columns: 3fr 1fr;
+	 			grid-template-areas: "sections search"
+		}
+		@media (max-width: 500px) {
+				.navigation {
+		 				grid-row-gap: 20px;
+		 				grid-template-columns: 1fr;
+		 				grid-template-areas: "sections"
+		 														 "search";
+				}
+		}
+		.sidebar {
+				grid-area: sidebar;
+				margin-top: 20px;
+		}
+		.content {
+				grid-area: content;
+				margin-top: 20px;
+		}
+		.a-no-decoration {
+				text-decoration: none;
+				color: black;
+		}
+		::placeholder {
+	 			color: black;
+		}
+		.form-field {
+				margin-bottom: 4px;
+		}
+		.form-label {
+				display: inline-block;
+				width: 60px;
+		}
+		.form-submit-button {
+	 			padding-left: 60px;
+	 			margin-left: .25em;
+		}
+		.sections {
+	 			grid-area: sections;
+	 			display: grid;
+	 			grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+	 			grid-template-areas: "a a home about contact github b b"
+		}
+		.sections-text {
+	 			font-size: 1em;
+	 			text-align: center;
+				align-self: center;
+		}
+		@media (max-width: 500px) {
+	 			.sections {
+	 					grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+	 					grid-template-areas: "a home about contact github a"
+	 			}
+		}
+		.sections-text:hover {
+	 			background-color: #c6c6c6;
+		}
+		.sections-home {
+	 			grid-area: home;
+		}
+		.sections-about {
+	 			grid-area: about;
+		}
+		.sections-contact {
+	 			grid-area: contact;
+		}
+		.sections-github {
+	 			grid-area: github;
+		}
+		.search {
+	 			grid-area: search;
+		}
+		.search-input {
+				width: 100%;
+				border-radius: 8px;
+				border: 1px solid #e6ecf0;
+				padding: 8px 12px 8px 12px;
+		}
+		.search-input:focus{
+				outline: 0;
+				box-shadow: 0 0 3pt 2pt #535959;
+		}
+		.sidebar-header {
+	 			width: 100%;
+	 			border-bottom: 2px solid;
+	 			margin-bottom: 10px;
+ 	 			display: grid;
+	 			align-items: center;
+	 			justify-content: center;
+		}
+		.sidebar-header-text {
+	 			margin: 0 0 3px 0;
+	 			font-size: 1em;
+	 			font-weight: bold;
+		}
+		.sidebar-links {
+				width: 100%;
+		}
+		.sidebar-link:hover {
+				text-decoration: underline;
+		}
+		.article {
+	 			margin-bottom: 40px;
+		}
+		.article-title {
+	 			width: 100%;
+	 			border-bottom: 2px solid;
+	 			margin-bottom: 10px;
+		}
+		.article-title-text {
+	 			margin: 0 0 3px 0;
+	 			font-size: 1em;
+	 			font-weight: bold;
+		}
+		.article-create-time {
+	 			display: grid;
+	 			grid-template-columns: 5fr 1fr;
+	 			grid-template-areas: "padding time";
+		}
+		.article-create-time-text {
+				margin: 0 0 0 0;
+				grid-area: time;
+				align-self: center;
+				justify-self: center;
+		}
+		.go-to-article {
+  			display: inline-block;
+	 			padding: 10px 10px 10px 10px;
+	 			margin-top: 16px;
+	 			background-color: #e8e8e8;
+		}
 	</style>
+
+	{{if eq .GenerateType "GenerateArticleHTML"}}
+	{{with $article := index .Articles .ArticleIndex}}
+	{{$article.CSS}}
+	{{end}}
+	{{end}}
+
 </head>
 
 <body>
@@ -280,11 +225,13 @@
 				<p class="sidebar-header-text">Recent Articles</p>
 			</div>
 			<div class="sidebar-links">
-				{{range $i, $a := .Articles}}
-				<div class="sidebar-link">
-				  <a class="a-no-decoration" href="/articles/{{$a.ID}}">{{$a.Title}}</a>
-				</div>
+				<ul>
+					{{range $i, $a := .Articles}}
+					<li>
+						<a class="sidebar-link a-no-decoration" href="/articles/{{$a.ID}}">{{$a.Title}}</a>
+					</li>
 				{{end}}
+				</ul>
 			</div>
 		</div> <!-- sidebar -->
 

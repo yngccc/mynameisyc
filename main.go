@@ -26,6 +26,7 @@ type article struct {
 	Title      string
 	CreateTime time.Time
 	UpdateTime time.Time
+	CSS        template.HTML
 	HTML       template.HTML
 	Javascript template.HTML
 }
@@ -59,7 +60,7 @@ func main() {
 				str := string(fileBytes[:])
 				str = strings.Replace(str, "\r\n", "\n", -1)
 				strs := strings.SplitN(str, "---separator---", -1)
-				if len(strs) != 5 {
+				if len(strs) != 6 {
 					log.Fatal("")
 				}
 				for i, _ := range strs {
@@ -78,8 +79,9 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				article.HTML = template.HTML(strs[3])
-				article.Javascript = template.HTML(strs[4])
+				article.CSS = template.HTML(strs[3])
+				article.HTML = template.HTML(strs[4])
+				article.Javascript = template.HTML(strs[5])
 				articles = append(articles, article)
 			}
 		}

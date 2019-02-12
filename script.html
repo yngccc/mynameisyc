@@ -10,6 +10,10 @@
 </script>
 
 <script>
+	function clamp(num, min, max) {
+		return num <= min ? min : num >= max ? max : num;
+	};	
+
 	function deg_to_rad(deg) {
 		return deg * Math.PI / 180;
 	};
@@ -56,6 +60,14 @@
 		mat[5] = 1;
 		mat[10] = 1;
 		mat[15] = 1;
+		return mat;
+	};
+
+	function mat4_translate(translate) {
+		var mat = mat4_identity();
+		mat[12] = translate[0];
+		mat[13] = translate[1];
+		mat[14] = translate[2];
 		return mat;
 	};
 	
