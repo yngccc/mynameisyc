@@ -164,10 +164,15 @@
 	 	 font-weight: bold;
 	 }
 	 .sidebar-links {
-	 	 width: 90%;
-	 	 margin: 0 auto;
+     width: 100%;
+     margin: 0 auto;
 	 }
 	 .sidebar-link {
+	 	 text-align: center;
+		 align-self: center;
+	 }
+	 .sidebar-link:hover {
+		 text-decoration: underline;
 	 }
 	 .article {
 	 	 margin-bottom: 40px;
@@ -275,15 +280,11 @@
 				<p class="sidebar-header-text">Recent Articles</p>
 			</div>
 			<div class="sidebar-links">
-				<ul>
-					{{range $i, $a := .Articles}}
-					{{if lt $i 8}}
-					<li>
-						<a class="sidebar-link a-no-decoration" href="/articles/{{$a.ID}}"><div>{{$a.Title}}</div></a>
-					</li>
-					{{end}}
-					{{end}}
-				</ul>
+				{{range $i, $a := .Articles}}
+				<div class="sidebar-link">
+				  <a class="a-no-decoration" href="/articles/{{$a.ID}}">{{$a.Title}}</a>
+				</div>
+				{{end}}
 			</div>
 		</div> <!-- sidebar -->
 
