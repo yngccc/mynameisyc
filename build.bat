@@ -7,6 +7,6 @@ taskkill /f /im mynameisyc.exe 2>nul
 
 go build
 
-mynameisyc.exe
+mynameisyc.exe -production=false
 
 popd
