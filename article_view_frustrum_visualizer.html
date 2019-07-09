@@ -29,70 +29,60 @@ Feb 9, 2019
 ---separator---
 
 <script>
+	function get_frustum_vertex_positions(horizontal_fov, aspect_ratio) {
+		var frustum = get_frustum_corners(horizontal_fov, aspect_ratio, 1, 10);
+		var points = new Array(24).fill([0, 0, 0]);
+		points[0] = frustum[0];
+		points[1] = frustum[1];
+		points[2] = frustum[1];
+		points[3] = frustum[3];
+		points[4] = frustum[3];
+		points[5] = frustum[2];
+		points[6] = frustum[2];
+		points[7] = frustum[0];
+
+		points[8] = frustum[4];
+		points[9] = frustum[5];
+		points[10] = frustum[5];
+		points[11] = frustum[7];
+		points[12] = frustum[7];
+		points[13] = frustum[6];
+		points[14] = frustum[6];
+		points[15] = frustum[4];
+		
+		points[16] = frustum[0];
+		points[17] = frustum[4];
+		points[18] = frustum[1];
+		points[19] = frustum[5];
+		points[20] = frustum[2];
+		points[21] = frustum[6];
+		points[22] = frustum[3];
+		points[23] = frustum[7];
+		
+		var positions = new Array(24 * 3).fill(0);
+		for (i = 0; i < 24; i += 1) {
+			positions[i * 3 + 0] = points[i][0];
+			positions[i * 3 + 1] = points[i][1];
+			positions[i * 3 + 2] = points[i][2];
+		}
+		return new Float32Array(positions);
+	}
+	
+	function parse_aspect_ratio(aspect_ratio) {
+		if (aspect_ratio === "4:3") {
+			return 4/3;
+		}
+		else if (aspect_ratio === "16:9") {
+			return 16/9;
+		}
+		else if (aspect_ratio === "21:9") {
+			return 21/9;
+		}
+		return 1;
+	}
+		
 	function main() {
 		var canvas = document.querySelector("#canvas");
-
-		function parse_aspect_ratio(aspect_ratio) {
-			if (aspect_ratio === "4:3") {
-				return 4/3;
-			}
-			else if (aspect_ratio === "16:9") {
-				return 16/9;
-			}
-			else if (aspect_ratio === "21:9") {
-				return 21/9;
-			}
-			return 1;
-		}
-		
-		var aspect_ratio_elem = document.getElementById("aspect-ratio");
-		var horizontal_fov_elem = document.getElementById("horizontal-fov");
-		var aspect_ratio = parse_aspect_ratio(aspect_ratio_elem.options[aspect_ratio_elem.selectedIndex].value);
-		var horizontal_fov = deg_to_rad(parseInt(horizontal_fov_elem.value));
-		aspect_ratio_elem.addEventListener("change", function() {
-			aspect_ratio = parse_aspect_ratio(aspect_ratio_elem.options[aspect_ratio_elem.selectedIndex].value);
-		});
-		horizontal_fov_elem.addEventListener("change", function() {
-			horizontal_fov = deg_to_rad(parseInt(horizontal_fov_elem.value));
-		});
-				
-		var mouse_state = {
-			down: false,
-			drag_x: 0,
-			drag_y: 0,
-			prev_x: 0,
-			prev_y: 0
-		};
-		
-		canvas.addEventListener("mouseenter", function(event) {
-			mouse_state.down = (event.buttons === 1);
-			mouse_state.prev_x = event.clientX;
-			mouse_state.prev_y = event.clientY;
-		});
-		canvas.addEventListener("mouseleave", function(event) {
-		});
-		canvas.addEventListener("mousemove", function(event) {
-			if (mouse_state.down) {
-				mouse_state.drag_x += event.clientX - mouse_state.prev_x;
-				mouse_state.drag_y += event.clientY - mouse_state.prev_y;
-				mouse_state.prev_x = event.clientX;
-				mouse_state.prev_y = event.clientY;
-			}
-		});
-		canvas.addEventListener("mousedown", function(event) {
-			mouse_state.down = true;
-			mouse_state.drag_x = 0;
-			mouse_state.drag_y = 0;
-			mouse_state.prev_x = event.clientX;
-			mouse_state.prev_y = event.clientY;
-		});
-		canvas.addEventListener("mouseup", function(event) {
-			mouse_state.down = false;
-			mouse_state.drag_x = 0;
-			mouse_state.drag_y = 0;
-			mouse_state.prev_x = event.clientX;
-			mouse_state.prev_y = event.clientY;
-		});
 
 		var gl = canvas.getContext("webgl");
 		if (gl === null) {
@@ -138,48 +128,63 @@ Feb 9, 2019
 			proj_mat : gl.getUniformLocation(shader, 'proj_mat'),
 		};
 
-		
-		var frustum = get_frustum_corners(horizontal_fov, aspect_ratio, 1, 10);
-		var points = new Array(24).fill([0, 0, 0]);
-		points[0] = frustum[0];
-		points[1] = frustum[1];
-		points[2] = frustum[1];
-		points[3] = frustum[3];
-		points[4] = frustum[3];
-		points[5] = frustum[2];
-		points[6] = frustum[2];
-		points[7] = frustum[0];
-
-		points[8] = frustum[4];
-		points[9] = frustum[5];
-		points[10] = frustum[5];
-		points[11] = frustum[7];
-		points[12] = frustum[7];
-		points[13] = frustum[6];
-		points[14] = frustum[6];
-		points[15] = frustum[4];
-		
-		points[16] = frustum[0];
-		points[17] = frustum[4];
-		points[18] = frustum[1];
-		points[19] = frustum[5];
-		points[20] = frustum[2];
-		points[21] = frustum[6];
-		points[22] = frustum[3];
-		points[23] = frustum[7];
-		
-		var positions = new Array(24 * 3).fill(0);
-		for (i = 0; i < 24; i += 1) {
-			positions[i * 3 + 0] = points[i][0];
-			positions[i * 3 + 1] = points[i][1];
-			positions[i * 3 + 2] = points[i][2];
-		}
+		var aspect_ratio_elem = document.getElementById("aspect-ratio");
+		var horizontal_fov_elem = document.getElementById("horizontal-fov");
+		var aspect_ratio = parse_aspect_ratio(aspect_ratio_elem.options[aspect_ratio_elem.selectedIndex].value);
+		var horizontal_fov = deg_to_rad(parseInt(horizontal_fov_elem.value));
 
 		var position_buffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, get_frustum_vertex_positions(horizontal_fov, aspect_ratio), gl.STATIC_DRAW);
 
-		var min_frame_time = 16.0;
+		aspect_ratio_elem.addEventListener("change", function() {
+			aspect_ratio = parse_aspect_ratio(aspect_ratio_elem.options[aspect_ratio_elem.selectedIndex].value);
+			gl.bufferData(gl.ARRAY_BUFFER, get_frustum_vertex_positions(horizontal_fov, aspect_ratio), gl.STATIC_DRAW);
+		});
+		horizontal_fov_elem.addEventListener("change", function() {
+			horizontal_fov = deg_to_rad(parseInt(horizontal_fov_elem.value));
+			gl.bufferData(gl.ARRAY_BUFFER, get_frustum_vertex_positions(horizontal_fov, aspect_ratio), gl.STATIC_DRAW);
+		});
+				
+		var mouse_state = {
+			down: false,
+			drag_x: 0,
+			drag_y: 0,
+			prev_x: 0,
+			prev_y: 0
+		};
+		
+		canvas.addEventListener("mouseenter", function(event) {
+			mouse_state.down = (event.buttons === 1);
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+		canvas.addEventListener("mouseleave", function(event) {
+		});
+		canvas.addEventListener("mousemove", function(event) {
+			if (mouse_state.down) {
+				mouse_state.drag_x += event.clientX - mouse_state.prev_x;
+				mouse_state.drag_y += event.clientY - mouse_state.prev_y;
+				mouse_state.prev_x = event.clientX;
+				mouse_state.prev_y = event.clientY;
+			}
+		});
+		canvas.addEventListener("mousedown", function(event) {
+			mouse_state.down = true;
+			mouse_state.drag_x = 0;
+			mouse_state.drag_y = 0;
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+		canvas.addEventListener("mouseup", function(event) {
+			mouse_state.down = false;
+			mouse_state.drag_x = 0;
+			mouse_state.drag_y = 0;
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+
+		var min_frame_time = 32.0;
 		var then = performance.now();
 		var translate = [0, 0, 0];
 		var translate_sensitivity = 2;
@@ -197,7 +202,7 @@ Feb 9, 2019
 				mouse_state.drag_y = 0;
 
 				var model_mat = mat4_translate(translate);
-				var view_mat = mat4_view([10, 10, 5], [0, 0, -10]);
+				var view_mat = mat4_view([30, 30, 15], [0, 0, -10]);
 				var fovy = deg_to_rad(45);
 				var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 				var proj_mat = mat4_perspective(fovy, aspect, 0.1, 100);
