@@ -1,14 +1,5 @@
 {{define "script"}}
 
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-133286258-1"></script>
-<script>
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'UA-133286258-1');
-</script>
-
 <script>
 	function clamp(num, min, max) {
 		return num <= min ? min : num >= max ? max : num;
@@ -161,6 +152,67 @@
 
 		return [near_top_left, near_top_right, near_bottom_left, near_bottom_right,
 						far_top_left, far_top_right, far_bottom_left, far_bottom_right];
+	};
+
+	function load_obj(obj_text) {
+		var obj = {
+			positions : [],
+			normals : [],
+			uvs : [],
+			faces : []
+		};
+
+		if (obj_text.indexOf('\r\n') !== -1) {
+			text = text.replace(/\r\n/g, '\n');
+		}
+		if (obj_text.indexOf('\\\n') !== -1) {
+			text = text.replace(/\\\n/g, '');
+		}
+		var lines = obj_text.split('\n');
+		for (var i = 0; i < lines.length; i += 1) {
+			var line = lines[i].trim();
+			if (line.length === 0) {
+				continue;
+			}
+			var first_char = line.charAt(0);
+			if (first_char === 'v') {
+				var fields = line.split(/\s+/);
+				if (fields[0] === 'v') {
+					obj.positions.push(parseFloat(fields[1]), parseFloat(fields[2]), parseFloat(fields[3]));
+				}
+				else if (fields[0] === 'vn') {
+					obj.normals.push(parseFloat(fields[1]), parseFloat(fields[2]), parseFloat(fields[3]));
+				}
+				else if (fields[0] === 'vt') {
+					obj.uvs.push(parseFloat(fields[1]), parseFloat(fields[2]));
+				}
+			}
+			else if (first_char === 'f') {
+				var vertex_strs = line.substr(1).trim().split(/\s+/);
+				var vertices = [];
+				// Parse the face vertex data into an easy to work with format
+				for ( var j = 0, jl = vertexData.length; j < jl; j ++ ) {
+					var vertex = vertexData[ j ];
+
+					if ( vertex.length > 0 ) {
+						var vertexParts = vertex.split( '/' );
+						faceVertices.push( vertexParts );
+					}
+				}
+				// Draw an edge between the first vertex and all subsequent vertices to form an n-gon
+				var v1 = faceVertices[ 0 ];
+				for ( var j = 1, jl = faceVertices.length - 1; j < jl; j ++ ) {
+					var v2 = faceVertices[ j ];
+					var v3 = faceVertices[ j + 1 ];
+
+					state.addFace(
+						v1[ 0 ], v2[ 0 ], v3[ 0 ],
+						v1[ 1 ], v2[ 1 ], v3[ 1 ],
+						v1[ 2 ], v2[ 2 ], v3[ 2 ]
+					);
+				}				
+			}
+		}
 	};
 	
 </script>

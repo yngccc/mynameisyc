@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"flag"
 	"fmt"
 	"html/template"
@@ -13,13 +14,6 @@ import (
 	"strings"
 	"time"
 )
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
 
 type article struct {
 	ID         int
@@ -35,6 +29,18 @@ type templateVars struct {
 	GenerateType string
 	Articles     []article
 	ArticleIndex int
+}
+
+type dataFile struct {
+	Name string
+	Gzip *bytes.Buffer
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func main() {
@@ -148,6 +154,35 @@ func main() {
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, articleHTMLs[0])
 	}))
+
+	dataFiles := make([]dataFile, 0)
+	{
+		files, err := ioutil.ReadDir("./data")
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, file := range files {
+			fileBytes, err := ioutil.ReadFile("./data/" + file.Name())
+			if err != nil {
+				log.Fatal(err)
+			}
+			df := dataFile{file.Name(), bytes.NewBuffer([]byte{})}
+			gz := gzip.NewWriter(df.Gzip)
+			_, err = gz.Write(fileBytes)
+			if err != nil {
+				log.Fatal(err)
+			}
+			gz.Close()
+			dataFiles = append(dataFiles, df)
+		}
+	}
+	for _, df := range dataFiles {
+		mux.HandleFunc("/data/"+df.Name, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Encoding", "gzip")
+			w.Header().Set("Content-Type", "text/plain")
+			w.Write(df.Gzip.Bytes())
+		}))
+	}
 
 	makeServer := func(mux *http.ServeMux) http.Server {
 		return http.Server{
