@@ -23,5 +23,12 @@ May 2, 2019
 ---separator---
 
 <script>
-  	
+  function main() {
+		var request = new XMLHttpRequest();
+		request.open('GET', '/data/fence_01.obj', false);
+		request.send();
+		var obj = load_obj(request.responseText);
+	};
+
+	main();
 </script>

@@ -163,10 +163,10 @@
 		};
 
 		if (obj_text.indexOf('\r\n') !== -1) {
-			text = text.replace(/\r\n/g, '\n');
+			obj_text = obj_text.replace(/\r\n/g, '\n');
 		}
 		if (obj_text.indexOf('\\\n') !== -1) {
-			text = text.replace(/\\\n/g, '');
+			obj_text = obj_text.replace(/\\\n/g, '');
 		}
 		var lines = obj_text.split('\n');
 		for (var i = 0; i < lines.length; i += 1) {
@@ -188,31 +188,21 @@
 				}
 			}
 			else if (first_char === 'f') {
-				var vertex_strs = line.substr(1).trim().split(/\s+/);
-				var vertices = [];
-				// Parse the face vertex data into an easy to work with format
-				for ( var j = 0, jl = vertexData.length; j < jl; j ++ ) {
-					var vertex = vertexData[ j ];
-
-					if ( vertex.length > 0 ) {
-						var vertexParts = vertex.split( '/' );
-						faceVertices.push( vertexParts );
+				var str = line.substr(1);
+				str.trim();
+				var vertex_strs = str.split(/\s+/);
+				if (vertex_strs.length === 3) {
+					var vertices = [];
+					for (var i = 0; i < 3; i += 1) {
+						var indices = vertex_strs[i].splt('/');
+						vertices.push(parseInt(indices[0]), parseInt(indices[2]), parseInt(indices[1]));
 					}
+					obj.faces.push(vertices);
 				}
-				// Draw an edge between the first vertex and all subsequent vertices to form an n-gon
-				var v1 = faceVertices[ 0 ];
-				for ( var j = 1, jl = faceVertices.length - 1; j < jl; j ++ ) {
-					var v2 = faceVertices[ j ];
-					var v3 = faceVertices[ j + 1 ];
-
-					state.addFace(
-						v1[ 0 ], v2[ 0 ], v3[ 0 ],
-						v1[ 1 ], v2[ 1 ], v3[ 1 ],
-						v1[ 2 ], v2[ 2 ], v3[ 2 ]
-					);
-				}				
 			}
 		}
+
+		return obj;
 	};
 	
 </script>
