@@ -26,9 +26,9 @@ May 2, 2019
 
   function main() {
 		var request = new XMLHttpRequest();
-		request.open('GET', '/data/fence_01.obj');
+		request.open('GET', '/data/fence_01.obj', false);
 		request.send();
-		// var obj = load_obj(request.responseText);
+		var obj = load_obj(request.responseText);
 
 		var canvas = document.querySelector("#canvas");
 
@@ -38,12 +38,80 @@ May 2, 2019
 			return;
 		}
 
+		var vert_shader_src = `
+      attribute vec3 position;
+      attribute vec3 normal;
+      uniform mat4 model_mat;
+      uniform mat4 view_mat;
+      uniform mat4 proj_mat;
+      varying vec3 t_normal;
+      void main() {
+        t_normal = mat3(model_mat) * normal;
+        gl_Position = proj_mat * view_mat * model_mat * vec4(position, 1);
+      }
+    `;
+
+		var frag_shader_src = `
+      precision mediump float;
+      varying vec3 t_normal;
+      void main() {
+        gl_FragColor = vec4(1, 1, 1, 1);
+      }
+    `;
+		
+		var vert_shader = gl.createShader(gl.VERTEX_SHADER);
+		var frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(vert_shader, vert_shader_src);
+		gl.shaderSource(frag_shader, frag_shader_src);
+		gl.compileShader(vert_shader);
+		gl.compileShader(frag_shader);
+		console.log("vert_shader status: " + gl.getShaderInfoLog(vert_shader));
+		console.log("frag_shader status: " + gl.getShaderInfoLog(frag_shader));
+
+		var shader = gl.createProgram();
+		gl.attachShader(shader, vert_shader);
+		gl.attachShader(shader, frag_shader);
+		gl.linkProgram(shader);
+		console.log("shader status: " + gl.getProgramInfoLog(shader));
+
+		var shader_info = {
+			position : gl.getAttribLocation(shader, "position"),
+			normal : gl.getAttribLocation(shader, "normal"),
+			model_mat : gl.getUniformLocation(shader, 'model_mat'),
+			view_mat : gl.getUniformLocation(shader, 'view_mat'),
+			proj_mat : gl.getUniformLocation(shader, 'proj_mat'),
+		};
+
+		var vertex_buffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(obj.vertices), gl.STATIC_DRAW);
+
 		function render(now) {
+			var model_mat = mat4_identity();
+			var view_mat = mat4_view([100, 100, 100], [0, 0, 0]);
+			var fovy = deg_to_rad(45);
+			var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+			var proj_mat = mat4_perspective(fovy, aspect, 0.1, 100);
+			
 			gl.clearColor(0, 0, 0, 1);
 			gl.clearDepth(1);
 			gl.enable(gl.DEPTH_TEST);
 			gl.depthFunc(gl.LEQUAL);
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+			gl.useProgram(shader);
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+			gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 32, 0);
+			gl.vertexAttribPointer(shader_info.normal, 3, gl.FLOAT, false, 32, 12);
+			gl.enableVertexAttribArray(shader_info.position);
+			gl.enableVertexAttribArray(shader_info.normal);
+
+			gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
+			gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
+			gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
+
+			gl.drawArrays(gl.TRIANGLES, 0, obj.vertices.length / 8);
 		}
 		requestAnimationFrame(render);
 	};

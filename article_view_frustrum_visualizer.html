@@ -206,10 +206,6 @@ Feb 9, 2019
 				var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 				var proj_mat = mat4_perspective(fovy, aspect, 0.1, 100);
 
-				gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
-				gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 0, 0);
-				gl.enableVertexAttribArray(shader_info.position);
-				
 				gl.clearColor(0, 0, 0, 1);
 				gl.clearDepth(1);
 				gl.enable(gl.DEPTH_TEST);
@@ -217,9 +213,15 @@ Feb 9, 2019
 				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 				gl.useProgram(shader);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
+				gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(shader_info.position);
+				
 				gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
 				gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
 				gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
+
 				gl.drawArrays(gl.LINES, 0, 24);
 			}
 			requestAnimationFrame(render);

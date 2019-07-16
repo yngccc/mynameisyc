@@ -159,7 +159,8 @@
 			positions : [],
 			normals : [],
 			uvs : [],
-			faces : []
+			faces : [],
+			vertices : []
 		};
 
 		if (obj_text.indexOf('\r\n') !== -1) {
@@ -192,8 +193,8 @@
 				var vertex_strs = str.split(/\s+/);
 				if (vertex_strs.length === 3) {
 					var vertices = [];
-					for (var n = 0; n < 3; n += 1) {
-						var indices = vertex_strs[n].split('/');
+					for (var j = 0; j < 3; j += 1) {
+						var indices = vertex_strs[j].split('/');
 						vertices.push(parseInt(indices[0]), parseInt(indices[2]), parseInt(indices[1]));
 					}
 					obj.faces.push(vertices);
@@ -201,6 +202,26 @@
 			}
 		}
 
+		for (var i = 0; i < obj.faces.length; i += 1) {
+			var face = obj.faces[i];
+			for (var j = 0; j < 3; j += 1) {
+				var position_index = face[j * 3];
+				var normal_index = face[j * 3 + 1];
+				var uv_index = face[j * 3 + 2];
+				var position_x = obj.positions[position_index * 3];
+				var position_y = obj.positions[position_index * 3 + 1];
+				var position_z = obj.positions[position_index * 3 + 2];
+				var normal_x = obj.normals[normal_index * 3];
+				var normal_y = obj.normals[normal_index * 3 + 1];
+				var normal_z = obj.normals[normal_index * 3 + 2];
+				var uv_x = obj.uvs[uv_index * 2];
+				var uv_y = obj.uvs[uv_index * 2 + 1];
+				obj.vertices.push(position_x, position_y, position_z,
+													normal_x, normal_y, normal_z,
+													uv_x, uv_y);
+			}
+		}
+		
 		return obj;
 	};
 	
