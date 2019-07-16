@@ -188,13 +188,12 @@
 				}
 			}
 			else if (first_char === 'f') {
-				var str = line.substr(1);
-				str.trim();
+				var str = line.substr(1).trim();
 				var vertex_strs = str.split(/\s+/);
 				if (vertex_strs.length === 3) {
 					var vertices = [];
-					for (var i = 0; i < 3; i += 1) {
-						var indices = vertex_strs[i].splt('/');
+					for (var n = 0; n < 3; n += 1) {
+						var indices = vertex_strs[n].split('/');
 						vertices.push(parseInt(indices[0]), parseInt(indices[2]), parseInt(indices[1]));
 					}
 					obj.faces.push(vertices);
