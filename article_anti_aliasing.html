@@ -1,4 +1,4 @@
-Anti Aliasing Techniques
+Anti Aliasing
 ---separator---
 May 2, 2019
 ---separator---
@@ -13,10 +13,10 @@ May 2, 2019
 <canvas id="canvas" width="640" height="480"></canvas>
 
 <div>
-  <select id="anti-aliasing-techniques-select">
-    <option value="No AA">NO AA</option>
-    <option value="MSAA">MSAA</option>
-    <option value="TAA" selected="selected">TAA</option>
+  <select id="anti-aliasing">
+    <option value="No AA">No AA</option>
+    <option value="MSAA" selected="selected">MSAA</option>
+    <option value="TAA">TAA</option>
   </select>
 </div>
 
@@ -111,43 +111,76 @@ May 2, 2019
 		
 		function render(now) {
 			var model_mat = mat4_identity();
-			var view_mat = mat4_view([800, 800, 800], [0, 0, -100]);
+			var view_mat = mat4_view([675, 600, 500], [25, 0, -250]);
 			var fovy = deg_to_rad(45);
 			var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 			var proj_mat = mat4_perspective(fovy, aspect, 0.1, 10000);
 			
-			gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, msaa_framebuffer);
-			gl.clearBufferfv(gl.COLOR, 0, [0, 0, 0, 1]);
-			gl.clearBufferfi(gl.DEPTH_STENCIL, 0, 1, 0);
+			var aa = anti_aliasing.options[anti_aliasing.selectedIndex].value;
+			if (aa === "No AA") {
+				gl.useProgram(shader);
 
-			gl.enable(gl.DEPTH_TEST);
-			gl.depthFunc(gl.LEQUAL);
+				gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+				
+				gl.clearColor(0, 0, 0, 1);
+				gl.clearDepth(1);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-			gl.useProgram(shader);
+				gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+				gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 32, 0);
+				gl.vertexAttribPointer(shader_info.normal, 3, gl.FLOAT, false, 32, 12);
+				gl.enableVertexAttribArray(shader_info.position);
+				gl.enableVertexAttribArray(shader_info.normal);
 
-			gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-			gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 32, 0);
-			gl.vertexAttribPointer(shader_info.normal, 3, gl.FLOAT, false, 32, 12);
-			gl.enableVertexAttribArray(shader_info.position);
-			gl.enableVertexAttribArray(shader_info.normal);
+				gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
+				gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
+				gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
 
-			gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
-			gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
-			gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
+				gl.drawArrays(gl.TRIANGLES, 0, obj.vertices.length / 8);
+			}
+			else if (aa === "MSAA") {
+				gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, msaa_framebuffer);
+				gl.clearBufferfv(gl.COLOR, 0, [0, 0, 0, 1]);
+				gl.clearBufferfi(gl.DEPTH_STENCIL, 0, 1, 0);
 
-			gl.drawArrays(gl.TRIANGLES, 0, obj.vertices.length / 8);
+				gl.enable(gl.DEPTH_TEST);
+				gl.depthFunc(gl.LEQUAL);
 
-			gl.bindFramebuffer(gl.READ_FRAMEBUFFER, msaa_framebuffer);
-			gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+				gl.useProgram(shader);
 
-			gl.clearColor(1, 0, 0, 1);
-			gl.clearDepth(1);
-			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-			gl.blitFramebuffer(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
-												 0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
-												 gl.COLOR_BUFFER_BIT, gl.NEAREST);
+				gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+				gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 32, 0);
+				gl.vertexAttribPointer(shader_info.normal, 3, gl.FLOAT, false, 32, 12);
+				gl.enableVertexAttribArray(shader_info.position);
+				gl.enableVertexAttribArray(shader_info.normal);
+
+				gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
+				gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
+				gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
+
+				gl.drawArrays(gl.TRIANGLES, 0, obj.vertices.length / 8);
+
+				gl.bindFramebuffer(gl.READ_FRAMEBUFFER, msaa_framebuffer);
+				gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+
+				gl.clearColor(0, 0, 0, 1);
+				gl.clearDepth(1);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+				gl.blitFramebuffer(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
+													 0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
+													 gl.COLOR_BUFFER_BIT, gl.NEAREST);
+			}
+			else if (aa === "TAA") {
+				console.log("TAA");
+			}
 		}
+
 		requestAnimationFrame(render);
+
+		var anti_aliasing = document.getElementById("anti-aliasing");
+		anti_aliasing.addEventListener("change", function() {
+			requestAnimationFrame(render);
+		});
 	};
 
 	main();
