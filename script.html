@@ -195,7 +195,7 @@
 					var vertices = [];
 					for (var j = 0; j < 3; j += 1) {
 						var indices = vertex_strs[j].split('/');
-						vertices.push(parseInt(indices[0]), parseInt(indices[2]), parseInt(indices[1]));
+						vertices.push(parseInt(indices[0]) - 1, parseInt(indices[2]) - 1, parseInt(indices[1]) - 1);
 					}
 					obj.faces.push(vertices);
 				}
