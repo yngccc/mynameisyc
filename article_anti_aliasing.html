@@ -171,7 +171,36 @@ May 2, 2019
 													 gl.COLOR_BUFFER_BIT, gl.NEAREST);
 			}
 			else if (aa === "TAA") {
-				console.log("TAA");
+				gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, msaa_framebuffer);
+				gl.clearBufferfv(gl.COLOR, 0, [0, 0, 0, 1]);
+				gl.clearBufferfi(gl.DEPTH_STENCIL, 0, 1, 0);
+
+				gl.enable(gl.DEPTH_TEST);
+				gl.depthFunc(gl.LEQUAL);
+
+				gl.useProgram(shader);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+				gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 32, 0);
+				gl.vertexAttribPointer(shader_info.normal, 3, gl.FLOAT, false, 32, 12);
+				gl.enableVertexAttribArray(shader_info.position);
+				gl.enableVertexAttribArray(shader_info.normal);
+
+				gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
+				gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
+				gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
+
+				gl.drawArrays(gl.TRIANGLES, 0, obj.vertices.length / 8);
+
+				gl.bindFramebuffer(gl.READ_FRAMEBUFFER, msaa_framebuffer);
+				gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
+
+				gl.clearColor(0, 0, 0, 1);
+				gl.clearDepth(1);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+				gl.blitFramebuffer(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
+													 0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
+													 gl.COLOR_BUFFER_BIT, gl.NEAREST);
 			}
 		}
 

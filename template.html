@@ -103,7 +103,7 @@
 	 			grid-area: sections;
 	 			display: grid;
 	 			grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-	 			grid-template-areas: "a a home about contact github b b"
+	 			grid-template-areas: "a a home contact github b b"
 		}
 		.sections-text {
 	 			font-size: 1em;
@@ -113,7 +113,7 @@
 		@media (max-width: 500px) {
 	 			.sections {
 	 					grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-	 					grid-template-areas: "a home about contact github a"
+	 					grid-template-areas: "a home contact github a"
 	 			}
 		}
 		.sections-text:hover {
@@ -121,9 +121,6 @@
 		}
 		.sections-home {
 	 			grid-area: home;
-		}
-		.sections-about {
-	 			grid-area: about;
 		}
 		.sections-contact {
 	 			grid-area: contact;
@@ -209,7 +206,6 @@
 		<div class="navigation">
 			<div class="sections">
 				<a class="sections-text sections-home a-no-decoration" href="/">Home</a>
-				<a class="sections-text sections-about a-no-decoration" href="/about">About</a>
 				<a class="sections-text sections-contact a-no-decoration" href="/contact">Contact</a>
 				<a class="sections-text sections-github a-no-decoration" href="https://github.com/yngccc">Github</a>
 			</div>
@@ -236,11 +232,7 @@
 		</div> <!-- sidebar -->
 
 		<div class="content">
-			{{if eq .GenerateType "GenerateAboutHTML"}}
-			<div style="margin:0 auto; grid-area: footer">
-				Nothing to see here yet...
-			</div>
-			{{else if eq .GenerateType "GenerateContactHTML"}}
+			{{if eq .GenerateType "GenerateContactHTML"}}
 			<div style="margin:0 auto; grid-area: footer">
 				You can contact me at <a href="mailto:yngccc@gmail.com">yngccc@gmail.com</a>
 			</div>

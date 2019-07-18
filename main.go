@@ -101,14 +101,6 @@ func main() {
 	var tmplVars templateVars
 	tmplVars.Articles = articles
 
-	aboutHTML := new(bytes.Buffer)
-	{
-		tmplVars.GenerateType = "GenerateAboutHTML"
-		err := htmlTemplate.Execute(aboutHTML, tmplVars)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 	contactHTML := new(bytes.Buffer)
 	{
 		tmplVars.GenerateType = "GenerateContactHTML"
@@ -138,9 +130,6 @@ func main() {
 	}))
 	mux.HandleFunc("/favicon.png", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "favicon.png")
-	}))
-	mux.HandleFunc("/about", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, aboutHTML)
 	}))
 	mux.HandleFunc("/contact", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, contactHTML)
