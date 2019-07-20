@@ -15,8 +15,8 @@ May 2, 2019
 <div>
   <select id="anti-aliasing">
     <option value="No AA">No AA</option>
-    <option value="MSAA" selected="selected">MSAA</option>
-    <option value="TAA">TAA</option>
+    <option value="MSAA">MSAA</option>
+    <option value="TAA" selected="selected">TAA</option>
   </select>
 </div>
 
@@ -38,26 +38,24 @@ May 2, 2019
 			return;
 		}
 
-		var vert_shader_src = `
-      attribute vec3 position;
-      attribute vec3 normal;
-      uniform mat4 model_mat;
-      uniform mat4 view_mat;
-      uniform mat4 proj_mat;
-      varying vec3 t_normal;
-      void main() {
-        t_normal = mat3(model_mat) * normal;
-        gl_Position = proj_mat * view_mat * model_mat * vec4(position, 1);
-      }
-    `;
+		var vert_shader_src =
+    `attribute vec3 position;
+     attribute vec3 normal;
+     uniform mat4 model_mat;
+     uniform mat4 view_mat;
+     uniform mat4 proj_mat;
+     varying vec3 t_normal;
+     void main() {
+       t_normal = mat3(model_mat) * normal;
+       gl_Position = proj_mat * view_mat * model_mat * vec4(position, 1);
+     }`;
 
-		var frag_shader_src = `
-      precision mediump float;
-      varying vec3 t_normal;
-      void main() {
-        gl_FragColor = vec4(1, 1, 1, 1);
-      }
-    `;
+		var frag_shader_src =
+		`precision mediump float;
+     varying vec3 t_normal;
+     void main() {
+       gl_FragColor = vec4(1, 1, 1, 1);
+     }`;
 		
 		var vert_shader = gl.createShader(gl.VERTEX_SHADER);
 		var frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -82,6 +80,53 @@ May 2, 2019
 			proj_mat : gl.getUniformLocation(shader, 'proj_mat'),
 		};
 
+		var taa_vert_shader_src =
+		`#version 300 es
+     void main() { 
+       gl_Position = vec4(gl_VertexID >> 1, gl_VertexID &1, 0, 0.5) * vec4(4, 4, 4, 4) - vec4(1, 1, 1, 1);
+     }`;
+
+		var taa_frag_shader_src =
+		`#version 300 es
+     precision mediump float;
+     uniform sampler2D texture_0;
+     uniform sampler2D texture_1;
+     uniform sampler2D texture_2;
+     uniform sampler2D texture_3;
+     uniform vec2 width_height;
+     out vec4 color;
+     void main() { 
+       vec4 texture_0_color = texture(texture_0, gl_FragCoord.xy / width_height);
+       vec4 texture_1_color = texture(texture_1, gl_FragCoord.xy / width_height);
+       vec4 texture_2_color = texture(texture_2, gl_FragCoord.xy / width_height);
+       vec4 texture_3_color = texture(texture_3, gl_FragCoord.xy / width_height);
+       color = texture_0_color + texture_1_color + texture_2_color + texture_3_color;
+       color = color / vec4(1, 1, 1, 1);
+     }`;
+
+		var taa_vert_shader = gl.createShader(gl.VERTEX_SHADER);
+		var taa_frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(taa_vert_shader, taa_vert_shader_src);
+		gl.shaderSource(taa_frag_shader, taa_frag_shader_src);
+		gl.compileShader(taa_vert_shader);
+		gl.compileShader(taa_frag_shader);
+		console.log("taa_vert_shader status: " + gl.getShaderInfoLog(taa_vert_shader));
+		console.log("taa_frag_shader status: " + gl.getShaderInfoLog(taa_frag_shader));
+
+		var taa_shader = gl.createProgram();
+		gl.attachShader(taa_shader, taa_vert_shader);
+		gl.attachShader(taa_shader, taa_frag_shader);
+		gl.linkProgram(taa_shader);
+		console.log("taa_shader status: " + gl.getProgramInfoLog(taa_shader));
+
+		var taa_shader_info = {
+			texture_0 : gl.getUniformLocation(taa_shader, "texture_0"),
+			texture_1 : gl.getUniformLocation(taa_shader, "texture_1"),
+			texture_2 : gl.getUniformLocation(taa_shader, 'texture_2'),
+			texture_3 : gl.getUniformLocation(taa_shader, 'texture_3'),
+			width_height : gl.getUniformLocation(taa_shader, 'width_height')
+		};
+
 		var vertex_buffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(obj.vertices), gl.STATIC_DRAW);
@@ -90,24 +135,43 @@ May 2, 2019
 		gl.bindRenderbuffer(gl.RENDERBUFFER, msaa_renderbuffer);
 		gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 8, gl.RGBA8, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
-		var msaa_renderbuffer_depth = gl.createRenderbuffer();
-		gl.bindRenderbuffer(gl.RENDERBUFFER, msaa_renderbuffer_depth);
+		var msaa_depth_renderbuffer = gl.createRenderbuffer();
+		gl.bindRenderbuffer(gl.RENDERBUFFER, msaa_depth_renderbuffer);
 		gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 8, gl.DEPTH_COMPONENT24, gl.canvas.clientWidth, gl.canvas.clientHeight);
 
 		var msaa_framebuffer = gl.createFramebuffer();
 		gl.bindFramebuffer(gl.FRAMEBUFFER, msaa_framebuffer);
-		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, msaa_renderbuffer);
-		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, msaa_renderbuffer_depth);
+		gl.framebufferRenderbuffer(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, msaa_renderbuffer);
+		gl.framebufferRenderbuffer(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, msaa_depth_renderbuffer);
 
-    var msaa_resolve_texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, msaa_resolve_texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.clientWidth, gl.canvas.clientHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    var taa_textures = [];
+		for (var i = 0; i < 4; i += 1) {
+			var texture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.clientWidth, gl.canvas.clientHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+			taa_textures.push(texture)
+		}
+		var taa_depth_renderbuffers = [];
+		for (var i = 0; i < 4; i += 1) {
+			var renderbuffer = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, gl.canvas.clientWidth, gl.canvas.clientHeight);
+			taa_depth_renderbuffers.push(renderbuffer);
+		}
 		
-		var msaa_resolve_framebuffer = gl.createFramebuffer();
-		gl.bindFramebuffer(gl.FRAMEBUFFER, msaa_resolve_framebuffer);
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, msaa_resolve_texture, 0);
+		var taa_framebuffers = [];
+		for (var i = 0; i < 4; i += 1) {
+			var framebuffer = gl.createFramebuffer();
+			gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+			gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, taa_textures[i], 0);
+			gl.framebufferRenderbuffer(gl.DRAW_FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, taa_depth_renderbuffers[i]);
+			taa_framebuffers.push(framebuffer);
+		}
+
+		gl.enable(gl.DEPTH_TEST);
+		gl.depthFunc(gl.LEQUAL);
 		
 		function render(now) {
 			var model_mat = mat4_identity();
@@ -143,9 +207,6 @@ May 2, 2019
 				gl.clearBufferfv(gl.COLOR, 0, [0, 0, 0, 1]);
 				gl.clearBufferfi(gl.DEPTH_STENCIL, 0, 1, 0);
 
-				gl.enable(gl.DEPTH_TEST);
-				gl.depthFunc(gl.LEQUAL);
-
 				gl.useProgram(shader);
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
@@ -168,39 +229,57 @@ May 2, 2019
 				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 				gl.blitFramebuffer(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
 													 0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
-													 gl.COLOR_BUFFER_BIT, gl.NEAREST);
+													 gl.COLOR_BUFFER_BIT, gl.LINEAR);
 			}
 			else if (aa === "TAA") {
-				gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, msaa_framebuffer);
-				gl.clearBufferfv(gl.COLOR, 0, [0, 0, 0, 1]);
-				gl.clearBufferfi(gl.DEPTH_STENCIL, 0, 1, 0);
+				var jitters = [[-0.5, -0.5], [0.5, 0.5], [-0.5, 0.5], [0.5, -0.5]];
+				for (var i = 0; i < 4; i += 1) {
+					gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, taa_framebuffers[i]);
+					gl.clearBufferfv(gl.COLOR, 0, [0, 0, 0, 1]);
+					gl.clearBufferfi(gl.DEPTH_STENCIL, 0, 1, 0);
 
-				gl.enable(gl.DEPTH_TEST);
-				gl.depthFunc(gl.LEQUAL);
+					gl.useProgram(shader);
 
-				gl.useProgram(shader);
+					gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+					gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 32, 0);
+					gl.vertexAttribPointer(shader_info.normal, 3, gl.FLOAT, false, 32, 12);
+					gl.enableVertexAttribArray(shader_info.position);
+					gl.enableVertexAttribArray(shader_info.normal);
 
-				gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-				gl.vertexAttribPointer(shader_info.position, 3, gl.FLOAT, false, 32, 0);
-				gl.vertexAttribPointer(shader_info.normal, 3, gl.FLOAT, false, 32, 12);
-				gl.enableVertexAttribArray(shader_info.position);
-				gl.enableVertexAttribArray(shader_info.normal);
+					var new_proj_mat = mat4_clone(proj_mat);
+					new_proj_mat[8] += jitters[i][0] / gl.canvas.clientWidth;
+					new_proj_mat[9] += jitters[i][1] / gl.canvas.clientHeight;
+					
+					gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
+					gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
+					gl.uniformMatrix4fv(shader_info.proj_mat, false, new_proj_mat);
 
-				gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
-				gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
-				gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
+					gl.drawArrays(gl.TRIANGLES, 0, obj.vertices.length / 8);
+				}
 
-				gl.drawArrays(gl.TRIANGLES, 0, obj.vertices.length / 8);
-
-				gl.bindFramebuffer(gl.READ_FRAMEBUFFER, msaa_framebuffer);
 				gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-
 				gl.clearColor(0, 0, 0, 1);
 				gl.clearDepth(1);
 				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-				gl.blitFramebuffer(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
-													 0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight,
-													 gl.COLOR_BUFFER_BIT, gl.NEAREST);
+
+				gl.useProgram(taa_shader);
+				gl.activeTexture(gl.TEXTURE0);
+				gl.bindTexture(gl.TEXTURE_2D, taa_textures[0]);
+				gl.activeTexture(gl.TEXTURE1);
+				gl.bindTexture(gl.TEXTURE_2D, taa_textures[1]);
+				gl.activeTexture(gl.TEXTURE2);
+				gl.bindTexture(gl.TEXTURE_2D, taa_textures[2]);
+				gl.activeTexture(gl.TEXTURE3);
+				gl.bindTexture(gl.TEXTURE_2D, taa_textures[3]);
+
+				gl.uniform1i(taa_shader_info.texture_0, 0);
+				gl.uniform1i(taa_shader_info.texture_1, 1);
+				gl.uniform1i(taa_shader_info.texture_2, 2);
+				gl.uniform1i(taa_shader_info.texture_3, 3);
+
+				gl.uniform2f(taa_shader_info.width_height, gl.canvas.clientWidth, gl.canvas.clientHeight);
+
+				gl.drawArrays(gl.TRIANGLES, 0, 3);
 			}
 		}
 
