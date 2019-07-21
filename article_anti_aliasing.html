@@ -93,15 +93,17 @@ May 2, 2019
      uniform sampler2D texture_1;
      uniform sampler2D texture_2;
      uniform sampler2D texture_3;
+     uniform sampler2D texture_4;
      uniform vec2 width_height;
+     uniform float weights[5];
      out vec4 color;
      void main() { 
-       vec4 texture_0_color = texture(texture_0, gl_FragCoord.xy / width_height);
-       vec4 texture_1_color = texture(texture_1, gl_FragCoord.xy / width_height);
-       vec4 texture_2_color = texture(texture_2, gl_FragCoord.xy / width_height);
-       vec4 texture_3_color = texture(texture_3, gl_FragCoord.xy / width_height);
-       color = texture_0_color + texture_1_color + texture_2_color + texture_3_color;
-       color = color / vec4(1, 1, 1, 1);
+       vec4 texture_0_color = texture(texture_0, gl_FragCoord.xy / width_height) * vec4(weights[0]);
+       vec4 texture_1_color = texture(texture_1, gl_FragCoord.xy / width_height) * vec4(weights[1]);
+       vec4 texture_2_color = texture(texture_2, gl_FragCoord.xy / width_height) * vec4(weights[2]);
+       vec4 texture_3_color = texture(texture_3, gl_FragCoord.xy / width_height) * vec4(weights[3]);
+       vec4 texture_4_color = texture(texture_4, gl_FragCoord.xy / width_height) * vec4(weights[4]);
+       color =  texture_0_color + texture_1_color + texture_2_color + texture_3_color + texture_4_color;
      }`;
 
 		var taa_vert_shader = gl.createShader(gl.VERTEX_SHADER);
@@ -124,7 +126,9 @@ May 2, 2019
 			texture_1 : gl.getUniformLocation(taa_shader, "texture_1"),
 			texture_2 : gl.getUniformLocation(taa_shader, 'texture_2'),
 			texture_3 : gl.getUniformLocation(taa_shader, 'texture_3'),
-			width_height : gl.getUniformLocation(taa_shader, 'width_height')
+			texture_4 : gl.getUniformLocation(taa_shader, 'texture_4'),
+			width_height : gl.getUniformLocation(taa_shader, 'width_height'),
+			weights : gl.getUniformLocation(taa_shader, 'weights')
 		};
 
 		var vertex_buffer = gl.createBuffer();
@@ -145,7 +149,7 @@ May 2, 2019
 		gl.framebufferRenderbuffer(gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, msaa_depth_renderbuffer);
 
     var taa_textures = [];
-		for (var i = 0; i < 4; i += 1) {
+		for (var i = 0; i < 5; i += 1) {
 			var texture = gl.createTexture();
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
@@ -153,20 +157,16 @@ May 2, 2019
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.clientWidth, gl.canvas.clientHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 			taa_textures.push(texture)
 		}
-		var taa_depth_renderbuffers = [];
-		for (var i = 0; i < 4; i += 1) {
-			var renderbuffer = gl.createRenderbuffer();
-			gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
-			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, gl.canvas.clientWidth, gl.canvas.clientHeight);
-			taa_depth_renderbuffers.push(renderbuffer);
-		}
+		var taa_depth_renderbuffer = gl.createRenderbuffer();
+		gl.bindRenderbuffer(gl.RENDERBUFFER, taa_depth_renderbuffer);
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, gl.canvas.clientWidth, gl.canvas.clientHeight);
 		
 		var taa_framebuffers = [];
-		for (var i = 0; i < 4; i += 1) {
+		for (var i = 0; i < 5; i += 1) {
 			var framebuffer = gl.createFramebuffer();
 			gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
 			gl.framebufferTexture2D(gl.DRAW_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, taa_textures[i], 0);
-			gl.framebufferRenderbuffer(gl.DRAW_FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, taa_depth_renderbuffers[i]);
+			gl.framebufferRenderbuffer(gl.DRAW_FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, taa_depth_renderbuffer);
 			taa_framebuffers.push(framebuffer);
 		}
 
@@ -232,8 +232,23 @@ May 2, 2019
 													 gl.COLOR_BUFFER_BIT, gl.LINEAR);
 			}
 			else if (aa === "TAA") {
-				var jitters = [[-0.5, -0.5], [0.5, 0.5], [-0.5, 0.5], [0.5, -0.5]];
-				for (var i = 0; i < 4; i += 1) {
+				// Halton(2,3)
+				var jitters = [[1/2, 1/3], [1/4, 2/3], [3/4, 1/9], [1/8, 4/9], [5/8, 7/9]];
+				for (var i = 0; i < 5; i += 1) {
+					jitters[i][0] = jitters[i][0] * 2 - 1;
+					jitters[i][1] = jitters[i][1] * 2 - 1;
+				}
+				var jitter_weights = [0.2, 0.2, 0.2, 0.2, 0.2];
+				// var sum = 0;
+				// for (var i = 0; i < 5; i += 1) {
+				// 	var radius = Math.sqrt(jitters[i][0] * jitters[i][0] + jitters[i][1] * jitters[i][1]);
+				// 	jitter_weights[i] = Math.exp(-2.29 * radius * radius);
+				// 	sum += jitter_weights[i];
+				// }
+				// for (var i = 0; i < 5; i += 1) {
+				// 	jitter_weights[i] = jitter_weights[i] / sum;
+				// }
+				for (var i = 0; i < 5; i += 1) {
 					gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, taa_framebuffers[i]);
 					gl.clearBufferfv(gl.COLOR, 0, [0, 0, 0, 1]);
 					gl.clearBufferfi(gl.DEPTH_STENCIL, 0, 1, 0);
@@ -271,13 +286,17 @@ May 2, 2019
 				gl.bindTexture(gl.TEXTURE_2D, taa_textures[2]);
 				gl.activeTexture(gl.TEXTURE3);
 				gl.bindTexture(gl.TEXTURE_2D, taa_textures[3]);
+				gl.activeTexture(gl.TEXTURE4);
+				gl.bindTexture(gl.TEXTURE_2D, taa_textures[4]);
 
 				gl.uniform1i(taa_shader_info.texture_0, 0);
 				gl.uniform1i(taa_shader_info.texture_1, 1);
 				gl.uniform1i(taa_shader_info.texture_2, 2);
 				gl.uniform1i(taa_shader_info.texture_3, 3);
+				gl.uniform1i(taa_shader_info.texture_4, 4);
 
 				gl.uniform2f(taa_shader_info.width_height, gl.canvas.clientWidth, gl.canvas.clientHeight);
+				gl.uniform1fv(taa_shader_info.weights, jitter_weights);
 
 				gl.drawArrays(gl.TRIANGLES, 0, 3);
 			}
