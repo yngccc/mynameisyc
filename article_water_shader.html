@@ -1,0 +1,156 @@
+Water Shader
+---separator---
+Jun 11, 2019
+---separator---
+Jun 11, 2019
+---separator---
+
+<style>
+</style>
+
+---separator---
+
+<canvas id="canvas" width="640" height="480"></canvas>
+
+<div>
+</div>
+
+---separator---
+
+<script>
+  function generate_vertices(hwidth, hheight, size) {
+		var vertices = [];
+		var vert = [-hwidth, -hheight, -hwidth, -hheight + size, -hwidth + size, -hheight,
+						    -hwidth + size, -hheight, -hwidth, -hheight + size, -hwidth + size, -hheight + size];
+		var w = 0;
+		var h = 0;
+		while (h < (hheight * 2)) {
+			while (w < (hwidth * 2)) {
+				var v = [];
+				for (var i = 0; i < 6; i += 1) {
+					v.push(vert[i * 2] + w, vert[i * 2 + 1] + h);
+				}
+				vertices = vertices.concat(v);
+				w += size;
+			}
+			w = 0;
+			h += size;
+		}
+		return vertices;
+	}
+	
+  function main() {
+		var canvas = document.querySelector("#canvas");
+
+		var gl = canvas.getContext("webgl");
+		if (gl === null) {
+			alert("Unable to initialize WebGL. Your browser or machine may not support it.");
+			return;
+		}
+
+		var vert_shader_src =
+    `attribute vec3 position;
+     uniform mat4 model_mat;
+     uniform mat4 view_mat;
+     uniform mat4 proj_mat;
+     uniform float width;
+     uniform float height;
+     uniform float k;
+     uniform float w;
+     uniform float t;
+     void main() {
+       float x = sqrt(position.x * position.x + position.y * position.y);
+       float height = sin(k * x - w * t);
+       gl_Position = proj_mat * view_mat * model_mat * vec4(position.x, height, position.y, 1);
+     }`;
+
+		var frag_shader_src =
+		`void main() {
+       gl_FragColor = vec4(1, 1, 1, 1);
+     }`;
+		
+		var vert_shader = gl.createShader(gl.VERTEX_SHADER);
+		var frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
+		gl.shaderSource(vert_shader, vert_shader_src);
+		gl.shaderSource(frag_shader, frag_shader_src);
+		gl.compileShader(vert_shader);
+		gl.compileShader(frag_shader);
+		console.log("vert_shader status: " + gl.getShaderInfoLog(vert_shader));
+		console.log("frag_shader status: " + gl.getShaderInfoLog(frag_shader));
+
+		var shader = gl.createProgram();
+		gl.attachShader(shader, vert_shader);
+		gl.attachShader(shader, frag_shader);
+		gl.linkProgram(shader);
+		console.log("shader status: " + gl.getProgramInfoLog(shader));
+
+		var shader_info = {
+			position : gl.getAttribLocation(shader, "position"),
+			normal : gl.getAttribLocation(shader, "normal"),
+			model_mat : gl.getUniformLocation(shader, 'model_mat'),
+			view_mat : gl.getUniformLocation(shader, 'view_mat'),
+			proj_mat : gl.getUniformLocation(shader, 'proj_mat'),
+			width : gl.getUniformLocation(shader, 'width'),
+			height : gl.getUniformLocation(shader, 'height'),
+			k : gl.getUniformLocation(shader, 'k'),
+			w : gl.getUniformLocation(shader, 'w'),
+			t : gl.getUniformLocation(shader, 't')
+		};
+
+		var width = 25;
+		var height = 25;
+		var size = 1;
+		var k = 1;
+		var w = 1;
+		
+		var vertices = generate_vertices(width, height, size);
+		var vertex_buffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+		gl.enable(gl.DEPTH_TEST);
+		gl.depthFunc(gl.LEQUAL);
+
+		var begin = performance.now();
+		var then = begin;
+		var min_frame_time = 32;
+		
+		function render(now) {
+			var dt = now - then;
+			if (dt >= min_frame_time) {
+				then = now;
+				var time = now - begin;
+
+				var model_mat = mat4_identity();
+				var view_mat = mat4_view([60, 60, 30], [0, 0, 0]);
+				var fovy = deg_to_rad(45);
+				var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+				var proj_mat = mat4_perspective(fovy, aspect, 0.1, 10000);
+				
+				gl.useProgram(shader);
+
+				gl.clearColor(0, 0, 0, 1);
+				gl.clearDepth(1);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+				gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+				gl.vertexAttribPointer(shader_info.position, 2, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(shader_info.position);
+
+				gl.uniformMatrix4fv(shader_info.model_mat, false, model_mat);
+				gl.uniformMatrix4fv(shader_info.view_mat, false, view_mat);
+				gl.uniformMatrix4fv(shader_info.proj_mat, false, proj_mat);
+				gl.uniform1f(shader_info.width, width);
+				gl.uniform1f(shader_info.height, height);
+				gl.uniform1f(shader_info.k, k);
+				gl.uniform1f(shader_info.w, w);
+				gl.uniform1f(shader_info.t, time / 1000);
+
+				gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
+			}
+			requestAnimationFrame(render);
+		}
+		requestAnimationFrame(render);
+	};
+	main();
+</script>
