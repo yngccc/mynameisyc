@@ -31,7 +31,7 @@ type templateVars struct {
 	ArticleIndex int
 }
 
-type dataFile struct {
+type gzipText struct {
 	Name string
 	Gzip *bytes.Buffer
 }
@@ -144,34 +144,37 @@ func main() {
 		fmt.Fprint(w, articleHTMLs[0])
 	}))
 
-	dataFiles := make([]dataFile, 0)
+	gzipTexts := make([]gzipText, 0)
 	{
-		files, err := ioutil.ReadDir("./data")
+		files, err := ioutil.ReadDir("./data/texts/")
 		if err != nil {
 			log.Fatal(err)
 		}
 		for _, file := range files {
-			fileBytes, err := ioutil.ReadFile("./data/" + file.Name())
+			fileBytes, err := ioutil.ReadFile("./data/texts/" + file.Name())
 			if err != nil {
 				log.Fatal(err)
 			}
-			df := dataFile{file.Name(), bytes.NewBuffer([]byte{})}
-			gz := gzip.NewWriter(df.Gzip)
+			txt := gzipText{file.Name(), bytes.NewBuffer([]byte{})}
+			gz := gzip.NewWriter(txt.Gzip)
 			_, err = gz.Write(fileBytes)
 			if err != nil {
 				log.Fatal(err)
 			}
 			gz.Close()
-			dataFiles = append(dataFiles, df)
+			gzipTexts = append(gzipTexts, txt)
 		}
 	}
-	for _, df := range dataFiles {
-		mux.HandleFunc("/data/"+df.Name, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	for _, txt := range gzipTexts {
+		mux.HandleFunc("/data/texts/"+txt.Name, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Encoding", "gzip")
 			w.Header().Set("Content-Type", "text/plain")
-			w.Write(df.Gzip.Bytes())
+			w.Write(txt.Gzip.Bytes())
 		}))
 	}
+	mux.HandleFunc("/data/images/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, r.URL.Path[1:])
+	})
 
 	makeServer := func(mux *http.ServeMux) http.Server {
 		return http.Server{
