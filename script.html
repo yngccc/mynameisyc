@@ -98,6 +98,14 @@
 		mat[14] = translate[2];
 		return mat;
 	};
+
+	function mat4_scale(scale) {
+		var mat = mat4_identity();
+		mat[0] = scale[0];
+		mat[5] = scale[1];
+		mat[10] = scale[2];
+		return mat;
+	};
 	
 	function mat4_view(eye, center) {
 		var up = [0, 1, 0];

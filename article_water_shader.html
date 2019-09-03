@@ -84,9 +84,9 @@ Jun 11, 2019
   function main() {
 		var canvas = document.querySelector("#canvas");
 
-		var gl = canvas.getContext("webgl");
+		var gl = canvas.getContext("webgl2");
 		if (gl === null) {
-			alert("Unable to initialize WebGL. Your browser or machine may not support it.");
+			alert("Unable to initialize WebGL2. Your browser or machine may not support it.");
 			return;
 		}
 
@@ -128,9 +128,7 @@ Jun 11, 2019
      uniform samplerCube sky_cubemap;
      varying vec3 normal;
      void main() {
-       vec3 light_dir = vec3(0, 1, 0);
-       float L = dot(light_dir, normal);
-       gl_FragColor = vec4(L, L, L, 1);
+       gl_FragColor = textureCube(sky_cubemap, normal);
      }`;
 		
 		var vert_shader = gl.createShader(gl.VERTEX_SHADER);
@@ -163,11 +161,13 @@ Jun 11, 2019
 
 		var sky_vert_shader_src =
 		`attribute vec3 position;
+     uniform mat4 model_mat;
+     uniform mat4 view_mat;
      uniform mat4 proj_mat;
      varying vec3 tex_coord;
      void main() {
        tex_coord = position;
-       gl_Position = proj_mat * vec4(position, 1);
+       gl_Position = proj_mat * view_mat * model_mat * vec4(position, 1);
        gl_Position = gl_Position.xyww;
      }`;
 
@@ -196,7 +196,10 @@ Jun 11, 2019
 
 		var sky_shader_info = {
 			position : gl.getAttribLocation(sky_shader, "position"),
-			sky_cubemap : gl.getUniformLocation(sky_shader, 'sky_cubemap')
+			model_mat : gl.getUniformLocation(sky_shader, "model_mat"),
+			view_mat : gl.getUniformLocation(sky_shader, "view_mat"),
+			proj_mat : gl.getUniformLocation(sky_shader, "proj_mat"),
+			sky_cubemap : gl.getUniformLocation(sky_shader, "sky_cubemap")
 		};
 
 		var width = 25;
@@ -217,13 +220,17 @@ Jun 11, 2019
 
 		var sky_cubemap = gl.createTexture();
 		gl.bindTexture(gl.TEXTURE_CUBE_MAP, sky_cubemap);
-		var sky_cubemap_tmp = new Uint8Array(1024 * 1024 * 4)
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, sky_cubemap_tmp);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, sky_cubemap_tmp);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, sky_cubemap_tmp);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, sky_cubemap_tmp);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, sky_cubemap_tmp);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, sky_cubemap_tmp);
+		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);  
 
     var sky_rt = new Image();
     var sky_lf = new Image();
@@ -231,18 +238,18 @@ Jun 11, 2019
     var sky_dn = new Image();
     var sky_ft = new Image();
     var sky_bk = new Image();
-		sky_rt.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_rt); };
-		sky_lf.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_lf); };
+		sky_rt.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_rt); };
+		sky_lf.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_lf); };
 		sky_up.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_up); };
 		sky_dn.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_dn); };
-		sky_ft.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_ft); };
-		sky_bk.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_bk); };
-		sky_rt.src = "data/images/bluecloud_rt.jpg";
-		sky_lf.src = "data/images/bluecloud_lf.jpg";
-		sky_up.src = "data/images/bluecloud_up.jpg";
-		sky_dn.src = "data/images/bluecloud_dn.jpg";
-		sky_ft.src = "data/images/bluecloud_ft.jpg";
-		sky_bk.src = "data/images/bluecloud_bk.jpg";
+		sky_ft.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_ft); };
+		sky_bk.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_bk); };
+		sky_rt.src = "/data/images/bluecloud_rt.jpg";
+		sky_lf.src = "/data/images/bluecloud_lf.jpg";
+		sky_up.src = "/data/images/bluecloud_up.jpg";
+		sky_dn.src = "/data/images/bluecloud_dn.jpg";
+		sky_ft.src = "/data/images/bluecloud_ft.jpg";
+		sky_bk.src = "/data/images/bluecloud_bk.jpg";
 		
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthFunc(gl.LEQUAL);
@@ -251,17 +258,17 @@ Jun 11, 2019
 		var then = begin;
 		var min_frame_time = 32;
 		
+		var model_mat = mat4_identity();
+		var view_mat = mat4_view([60, 60, 30], [0, 0, 0]);
+		var fovy = deg_to_rad(45);
+		var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+		var proj_mat = mat4_perspective(fovy, aspect, 0.1, 10000);
+
 		function render(now) {
 			var dt = now - then;
 			if (dt >= min_frame_time) {
 				then = now;
 				var time = now - begin;
-
-				var model_mat = mat4_identity();
-				var view_mat = mat4_view([60, 60, 30], [0, 0, 0]);
-				var fovy = deg_to_rad(45);
-				var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-				var proj_mat = mat4_perspective(fovy, aspect, 0.1, 10000);
 				
 				gl.clearColor(0, 0, 0, 1);
 				gl.clearDepth(1);
@@ -287,17 +294,20 @@ Jun 11, 2019
 
 				gl.drawArrays(gl.TRIANGLES, 0, vertices.length / 2);
 
-				gl.useProgram(sky_shader);
-				gl.bindBuffer(gl.ARRAY_BUFFER, sky_vertex_buffer);
-				gl.vertexAttribPointer(sky_shader_info.position, 3, gl.FLOAT, false, 0, 0);
-				gl.enableVertexAttribArray(sky_shader_info.position);
+				// gl.useProgram(sky_shader);
 
-				// gl.uniformMatrix4fv(sky_shader_info.proj_mat, false, view_mat);
+				// gl.bindBuffer(gl.ARRAY_BUFFER, sky_vertex_buffer);
+				// gl.vertexAttribPointer(sky_shader_info.position, 3, gl.FLOAT, false, 0, 0);
+				// gl.enableVertexAttribArray(sky_shader_info.position);
+
+				// gl.uniformMatrix4fv(sky_shader_info.model_mat, false, mat4_identity());
+				// gl.uniformMatrix4fv(sky_shader_info.view_mat, false, mat4_view([0, 0, 0], [1, 1, 1]));
+				// gl.uniformMatrix4fv(sky_shader_info.proj_mat, false, proj_mat);
 				
-				gl.drawArrays(gl.TRIANGLES, 0, sky_vertices.length / 3);
+				// gl.drawArrays(gl.TRIANGLES, 0, sky_vertices.length / 3);
 			}
 			requestAnimationFrame(render);
-		}
+		};
 		requestAnimationFrame(render);
 	};
 	main();
