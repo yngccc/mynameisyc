@@ -175,6 +175,9 @@ func main() {
 	mux.HandleFunc("/data/images/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, r.URL.Path[1:])
 	})
+	mux.HandleFunc("/lib/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, r.URL.Path[1:])
+	})
 
 	makeServer := func(mux *http.ServeMux) http.Server {
 		return http.Server{
