@@ -10,7 +10,7 @@ Jun 11, 2019
 
 ---separator---
 
-<canvas id="canvas" width="640" height="480"></canvas>
+<canvas id="canvas" width="720" height="480"></canvas>
 
 <div>
 </div>
@@ -131,21 +131,7 @@ Jun 11, 2019
        gl_FragColor = textureCube(sky_cubemap, normal);
      }`;
 		
-		var vert_shader = gl.createShader(gl.VERTEX_SHADER);
-		var frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
-		gl.shaderSource(vert_shader, vert_shader_src);
-		gl.shaderSource(frag_shader, frag_shader_src);
-		gl.compileShader(vert_shader);
-		gl.compileShader(frag_shader);
-		console.log("vert_shader status: " + gl.getShaderInfoLog(vert_shader));
-		console.log("frag_shader status: " + gl.getShaderInfoLog(frag_shader));
-
-		var shader = gl.createProgram();
-		gl.attachShader(shader, vert_shader);
-		gl.attachShader(shader, frag_shader);
-		gl.linkProgram(shader);
-		console.log("shader status: " + gl.getProgramInfoLog(shader));
-
+		var shader = gl_gen_shader(gl, vert_shader_src, frag_shader_src, "");
 		var shader_info = {
 			position : gl.getAttribLocation(shader, "position"),
 			normal : gl.getAttribLocation(shader, "normal"),
@@ -179,21 +165,7 @@ Jun 11, 2019
        gl_FragColor = textureCube(sky_cubemap, tex_coord);
      }`;
 
-		var sky_vert_shader = gl.createShader(gl.VERTEX_SHADER);
-		var sky_frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
-		gl.shaderSource(sky_vert_shader, sky_vert_shader_src);
-		gl.shaderSource(sky_frag_shader, sky_frag_shader_src);
-		gl.compileShader(sky_vert_shader);
-		gl.compileShader(sky_frag_shader);
-		console.log("sky_vert_shader status: " + gl.getShaderInfoLog(sky_vert_shader));
-		console.log("sky_frag_shader status: " + gl.getShaderInfoLog(sky_frag_shader));
-
-		var sky_shader = gl.createProgram();
-		gl.attachShader(sky_shader, sky_vert_shader);
-		gl.attachShader(sky_shader, sky_frag_shader);
-		gl.linkProgram(sky_shader);
-		console.log("sky_shader status: " + gl.getProgramInfoLog(sky_shader));
-
+		var sky_shader = gl_gen_shader(gl, sky_vert_shader_src, sky_frag_shader_src, "sky");
 		var sky_shader_info = {
 			position : gl.getAttribLocation(sky_shader, "position"),
 			model_mat : gl.getUniformLocation(sky_shader, "model_mat"),
@@ -259,7 +231,7 @@ Jun 11, 2019
 		var min_frame_time = 32;
 		
 		var model_mat = mat4_identity();
-		var view_mat = mat4_view([60, 60, 30], [0, 0, 0]);
+		var view_mat = mat4_view([60, 60, 30], [0, 0, 0], [0, 1, 0]);
 		var fovy = deg_to_rad(45);
 		var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 		var proj_mat = mat4_perspective(fovy, aspect, 0.1, 10000);
@@ -301,7 +273,7 @@ Jun 11, 2019
 				// gl.enableVertexAttribArray(sky_shader_info.position);
 
 				// gl.uniformMatrix4fv(sky_shader_info.model_mat, false, mat4_identity());
-				// gl.uniformMatrix4fv(sky_shader_info.view_mat, false, mat4_view([0, 0, 0], [1, 1, 1]));
+				// gl.uniformMatrix4fv(sky_shader_info.view_mat, false, mat4_view([0, 0, 0], [1, 1, 1], [0, 1, 0]));
 				// gl.uniformMatrix4fv(sky_shader_info.proj_mat, false, proj_mat);
 				
 				// gl.drawArrays(gl.TRIANGLES, 0, sky_vertices.length / 3);

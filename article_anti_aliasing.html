@@ -10,7 +10,7 @@ May 2, 2019
 
 ---separator---
 
-<canvas id="canvas" width="640" height="480"></canvas>
+<canvas id="canvas" width="720" height="480"></canvas>
 
 <div>
   <select id="anti-aliasing">
@@ -96,14 +96,14 @@ May 2, 2019
      uniform sampler2D texture_4;
      uniform vec2 width_height;
      uniform float weights[5];
-     out vec4 color;
+     out vec4 frag_color;
      void main() { 
        vec4 texture_0_color = texture(texture_0, gl_FragCoord.xy / width_height) * vec4(weights[0]);
        vec4 texture_1_color = texture(texture_1, gl_FragCoord.xy / width_height) * vec4(weights[1]);
        vec4 texture_2_color = texture(texture_2, gl_FragCoord.xy / width_height) * vec4(weights[2]);
        vec4 texture_3_color = texture(texture_3, gl_FragCoord.xy / width_height) * vec4(weights[3]);
        vec4 texture_4_color = texture(texture_4, gl_FragCoord.xy / width_height) * vec4(weights[4]);
-       color =  texture_0_color + texture_1_color + texture_2_color + texture_3_color + texture_4_color;
+       frag_color =  texture_0_color + texture_1_color + texture_2_color + texture_3_color + texture_4_color;
      }`;
 
 		var taa_vert_shader = gl.createShader(gl.VERTEX_SHADER);
@@ -175,7 +175,7 @@ May 2, 2019
 		
 		function render(now) {
 			var model_mat = mat4_identity();
-			var view_mat = mat4_view([675, 600, 500], [25, 0, -250]);
+			var view_mat = mat4_view([675, 600, 500], [25, 0, -250], [0, 1, 0]);
 			var fovy = deg_to_rad(45);
 			var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
 			var proj_mat = mat4_perspective(fovy, aspect, 0.1, 10000);

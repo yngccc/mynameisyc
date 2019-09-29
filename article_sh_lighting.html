@@ -1,4 +1,4 @@
-Spherical Harmonic Lighting
+Radiance and Irradiance
 ---separator---
 Aug 20, 2019
 ---separator---
@@ -10,7 +10,7 @@ Aug 20, 2019
 
 ---separator---
 
-<canvas id="canvas" width="640" height="480"></canvas>
+<canvas id="canvas" width="720" height="480"></canvas>
 
 <div>
 </div>
@@ -785,48 +785,53 @@ Aug 20, 2019
 		];
 		return vertices;
 	};
-	
-  function generate_sky_vertices() {
-		var vertices = [
-			-1.0,-1.0,-1.0,
-			-1.0,-1.0, 1.0,
-			-1.0, 1.0, 1.0,
-			1.0, 1.0,-1.0,
-			-1.0,-1.0,-1.0,
-			-1.0, 1.0,-1.0,
-			1.0,-1.0, 1.0,
-			-1.0,-1.0,-1.0,
-			1.0,-1.0,-1.0,
-			1.0, 1.0,-1.0,
-			1.0,-1.0,-1.0,
-			-1.0,-1.0,-1.0,
-			-1.0,-1.0,-1.0,
-			-1.0, 1.0, 1.0,
-			-1.0, 1.0,-1.0,
-			1.0,-1.0, 1.0,
-			-1.0,-1.0, 1.0,
-			-1.0,-1.0,-1.0,
-			-1.0, 1.0, 1.0,
-			-1.0,-1.0, 1.0,
-			1.0,-1.0, 1.0,
-			1.0, 1.0, 1.0,
-			1.0,-1.0,-1.0,
-			1.0, 1.0,-1.0,
-			1.0,-1.0,-1.0,
-			1.0, 1.0, 1.0,
-			1.0,-1.0, 1.0,
-			1.0, 1.0, 1.0,
-			1.0, 1.0,-1.0,
-			-1.0, 1.0,-1.0,
-			1.0, 1.0, 1.0,
-			-1.0, 1.0,-1.0,
-			-1.0, 1.0, 1.0,
-			1.0, 1.0, 1.0,
-			-1.0, 1.0, 1.0,
-			1.0,-1.0, 1.0
-		];
-		return vertices;
-	};
+
+  function generate_cube_vertices() {
+		return [
+			// back face
+			-1, -1, -1,  0,  0, -1, 0, 0, // bottom-left
+			1,  1, -1,  0,  0, -1, 1, 1,  // top-right
+			1, -1, -1,  0,  0, -1, 1, 0,  // bottom-right         
+			1,  1, -1,  0,  0, -1, 1, 1,  // top-right
+			-1, -1, -1,  0,  0, -1, 0, 0, // bottom-left
+			-1,  1, -1,  0,  0, -1, 0, 1, // top-left
+			// front face
+			-1, -1,  1,  0,  0,  1, 0, 0, // bottom-left
+			1, -1,  1,  0,  0,  1, 1, 0,  // bottom-right
+			1,  1,  1,  0,  0,  1, 1, 1,  // top-right
+			1,  1,  1,  0,  0,  1, 1, 1,  // top-right
+			-1,  1,  1,  0,  0,  1, 0, 1, // top-left
+			-1, -1,  1,  0,  0,  1, 0, 0, // bottom-left
+			// left face
+			-1,  1,  1, -1,  0,  0, 1, 0, // top-right
+			-1,  1, -1, -1,  0,  0, 1, 1, // top-left
+			-1, -1, -1, -1,  0,  0, 0, 1, // bottom-left
+			-1, -1, -1, -1,  0,  0, 0, 1, // bottom-left
+			-1, -1,  1, -1,  0,  0, 0, 0, // bottom-right
+			-1,  1,  1, -1,  0,  0, 1, 0, // top-right
+			// right face
+			1,  1,  1,  1,  0,  0, 1, 0,  // top-left
+			1, -1, -1,  1,  0,  0, 0, 1,  // bottom-right
+			1,  1, -1,  1,  0,  0, 1, 1,  // top-right         
+			1, -1, -1,  1,  0,  0, 0, 1,  // bottom-right
+			1,  1,  1,  1,  0,  0, 1, 0,  // top-left
+			1, -1,  1,  1,  0,  0, 0, 0,  // bottom-left     
+			// bottom face
+			-1, -1, -1,  0, -1,  0, 0, 1, // top-right
+			1, -1, -1,  0, -1,  0, 1, 1,  // top-left
+			1, -1,  1,  0, -1,  0, 1, 0,  // bottom-left
+			1, -1,  1,  0, -1,  0, 1, 0,  // bottom-left
+			-1, -1,  1,  0, -1,  0, 0, 0, // bottom-right
+			-1, -1, -1,  0, -1,  0, 0, 1, // top-right
+			// top face
+			-1,  1, -1,  0,  1,  0, 0, 1, // top-left
+			1,  1 , 1,  0,  1,  0, 1, 0,  // bottom-right
+			1,  1, -1,  0,  1,  0, 1, 1,  // top-right     
+			1,  1,  1,  0,  1,  0, 1, 0,  // bottom-right
+			-1,  1, -1,  0,  1,  0, 0, 1, // top-left
+			-1,  1,  1,  0,  1,  0, 0, 0  // bottom-left        
+	  ];
+  };
 
   function main() {
 		var canvas = document.querySelector("#canvas");
@@ -836,93 +841,140 @@ Aug 20, 2019
 			alert("Unable to initialize WebGL2. Your browser or machine may not support it.");
 			return;
 		}
+		const ext = gl.getExtension("EXT_color_buffer_float");
+		if (!ext) {
+			alert("Missing WebGL2 EXT_color_buffer_float");
+			return;
+		}
 
-		var sphere_vert_shader_src =
+		gl.enable(gl.DEPTH_TEST);
+		gl.depthFunc(gl.LEQUAL);
+		
+		var equirect_to_cube_vert_shader_src =
 		`attribute vec3 position;
      uniform mat4 model_mat;
      uniform mat4 view_mat;
      uniform mat4 proj_mat;
-     varying vec3 uv_v;
+     varying vec3 position_v;
      void main() {
-       uv_v = position;
+       position_v = position;
+       position_v.y *= -1.0;
        gl_Position = proj_mat * view_mat * model_mat * vec4(position, 1);
      }`;
   
-		var sphere_frag_shader_src =
+		var equirect_to_cube_frag_shader_src =
 		`precision mediump float;
-     uniform samplerCube sky_cubemap;
      uniform sampler2D env_map;
      varying vec3 position_v;
-     varying vec3 uv_v;
+     vec2 sample_env_map(vec3 v) {
+       const vec2 inv_atan = vec2(0.1591, 0.3183);
+       vec2 uv = vec2(atan(v.z, v.x), asin(v.y));
+       uv *= inv_atan;
+       uv += 0.5;
+       return uv;
+     }
      void main() {
-       gl_FragColor = textureCube(sky_cubemap, uv_v);
+       vec2 uv = sample_env_map(normalize(position_v));
+       vec4 color = texture2D(env_map, uv);
+       color.rgb *= pow(2.0, color.a * 255.0 - 128.0);
+       gl_FragColor = vec4(color.rgb, 1.0);
      }`;
-		
-		var sphere_vert_shader = gl.createShader(gl.VERTEX_SHADER);
-		var sphere_frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
-		gl.shaderSource(sphere_vert_shader, sphere_vert_shader_src);
-		gl.shaderSource(sphere_frag_shader, sphere_frag_shader_src);
-		gl.compileShader(sphere_vert_shader);
-		gl.compileShader(sphere_frag_shader);
-		console.log("sphere_vert_shader status: " + gl.getShaderInfoLog(sphere_vert_shader));
-		console.log("sphere_frag_shader status: " + gl.getShaderInfoLog(sphere_frag_shader));
 
-		var sphere_shader = gl.createProgram();
-		gl.attachShader(sphere_shader, sphere_vert_shader);
-		gl.attachShader(sphere_shader, sphere_frag_shader);
-		gl.linkProgram(sphere_shader);
-		console.log("sphere_shader status: " + gl.getProgramInfoLog(sphere_shader));
-
-		var sphere_shader_info = {
-			position : gl.getAttribLocation(sphere_shader, "position"),
-			model_mat : gl.getUniformLocation(sphere_shader, "model_mat"),
-			view_mat : gl.getUniformLocation(sphere_shader, "view_mat"),
-			proj_mat : gl.getUniformLocation(sphere_shader, "proj_mat"),
-			sky_cubemap : gl.getUniformLocation(sphere_shader, "sky_cubemap"),
-			env_map : gl.getUniformLocation(sphere_shader, "env_map")
+		var equirect_to_cube_shader = gl_gen_shader(gl, equirect_to_cube_vert_shader_src, equirect_to_cube_frag_shader_src, "equirect_to_cube");
+		var equirect_to_cube_shader_info = {
+			position : gl.getAttribLocation(equirect_to_cube_shader, "position"),
+			model_mat : gl.getUniformLocation(equirect_to_cube_shader, "model_mat"),
+			view_mat : gl.getUniformLocation(equirect_to_cube_shader, "view_mat"),
+			proj_mat : gl.getUniformLocation(equirect_to_cube_shader, "proj_mat"),
+			env_map : gl.getUniformLocation(equirect_to_cube_shader, "env_map")
 		};
 
-		var sky_vert_shader_src =
+		var irradiance_vert_shader_src =
+		`#version 300 es
+     uniform mat4 model_mat;
+     uniform mat4 view_mat;
+     uniform mat4 proj_mat;
+     layout(location = 0) in vec3 position;
+     out vec3 position_v;
+     out mat3 tbn_mat;
+     void main() {
+       position_v = position;
+       vec3 normal = normalize(position);
+       vec3 tangent = cross(vec3(0, 1, 0), normal);
+       if (length(tangent) == 0.0) {
+		     tangent = vec3(-1, 0, 0);
+       }
+	     vec3 bitangent = cross(normal, tangent);
+	     tbn_mat = mat3(tangent, bitangent, normal);
+       gl_Position = proj_mat * view_mat * model_mat * vec4(position, 1);
+     }`;
+  
+		var irradiance_frag_shader_src =
+		`#version 300 es
+     precision mediump float;
+     uniform samplerCube cubemap;
+     in vec3 position_v;
+     in mat3 tbn_mat;
+     out vec4 frag_color;
+     const float PI = 3.14159265359;
+     float rand_xorshift(inout uint rng_state) {
+     	 rng_state ^= (rng_state << 13);
+     	 rng_state ^= (rng_state >> 17);
+     	 rng_state ^= (rng_state << 5);
+     	 return float(rng_state) * (1.0 / 4294967296.0);
+     }
+     void main() {
+       const uint sample_count = 512u;
+       uint rng_state = 666u;
+       vec3 irradiance = vec3(0.0, 0.0, 0.0);
+	     for (uint i = 0u; i < sample_count; i += 1u) {
+		     vec2 xi = vec2(rand_xorshift(rng_state), rand_xorshift(rng_state));
+		     vec3 n = vec3(sqrt(xi[0]) * cos(2.0 * PI * xi[1]), sqrt(xi[0]) * sin(2.0 * PI * xi[1]), sqrt(1.0 - xi[0]));
+		     vec3 normal = tbn_mat * n;
+         irradiance += texture(cubemap, normal).rgb;
+       }
+       irradiance = irradiance / float(sample_count);
+       frag_color = vec4(irradiance, 1.0);
+     }`;
+
+		var irradiance_shader = gl_gen_shader(gl, irradiance_vert_shader_src, irradiance_frag_shader_src, "irradiance");
+		var irradiance_shader_info = {
+			position : gl.getAttribLocation(irradiance_shader, "position"),
+			model_mat : gl.getUniformLocation(irradiance_shader, "model_mat"),
+			view_mat : gl.getUniformLocation(irradiance_shader, "view_mat"),
+			proj_mat : gl.getUniformLocation(irradiance_shader, "proj_mat"),
+			cubemap : gl.getUniformLocation(irradiance_shader, "cubemap")
+		};
+		
+		var cubemap_vert_shader_src =
 		`attribute vec3 position;
      uniform mat4 model_mat;
      uniform mat4 view_mat;
      uniform mat4 proj_mat;
-     varying vec3 tex_coord;
+     varying vec3 position_v;
      void main() {
-       tex_coord = position;
+       position_v = position;
        gl_Position = proj_mat * view_mat * model_mat * vec4(position, 1);
-       gl_Position = gl_Position.xyww;
      }`;
 
-		var sky_frag_shader_src =
+		var cubemap_frag_shader_src =
 		`precision mediump float;
-     uniform samplerCube sky_cubemap;
-     varying vec3 tex_coord;
+     uniform samplerCube cubemap;
+     varying vec3 position_v;
      void main() {
-       gl_FragColor = textureCube(sky_cubemap, tex_coord);
+       vec4 color = textureCube(cubemap, position_v);
+       color.rgb = vec3(1.0) - exp(-color.rgb * 1.0);
+       color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+       gl_FragColor = vec4(color.rgb, 1.0);
      }`;
 
-		var sky_vert_shader = gl.createShader(gl.VERTEX_SHADER);
-		var sky_frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
-		gl.shaderSource(sky_vert_shader, sky_vert_shader_src);
-		gl.shaderSource(sky_frag_shader, sky_frag_shader_src);
-		gl.compileShader(sky_vert_shader);
-		gl.compileShader(sky_frag_shader);
-		console.log("sky_vert_shader status: " + gl.getShaderInfoLog(sky_vert_shader));
-		console.log("sky_frag_shader status: " + gl.getShaderInfoLog(sky_frag_shader));
-
-		var sky_shader = gl.createProgram();
-		gl.attachShader(sky_shader, sky_vert_shader);
-		gl.attachShader(sky_shader, sky_frag_shader);
-		gl.linkProgram(sky_shader);
-		console.log("sky_shader status: " + gl.getProgramInfoLog(sky_shader));
-
-		var sky_shader_info = {
-			position : gl.getAttribLocation(sky_shader, "position"),
-			model_mat : gl.getUniformLocation(sky_shader, "model_mat"),
-			view_mat : gl.getUniformLocation(sky_shader, "view_mat"),
-			proj_mat : gl.getUniformLocation(sky_shader, "proj_mat"),
-			sky_cubemap : gl.getUniformLocation(sky_shader, "sky_cubemap")
+		var cubemap_shader = gl_gen_shader(gl, cubemap_vert_shader_src, cubemap_frag_shader_src, "cubemap");
+		var cubemap_shader_info = {
+			position : gl.getAttribLocation(cubemap_shader, "position"),
+			model_mat : gl.getUniformLocation(cubemap_shader, "model_mat"),
+			view_mat : gl.getUniformLocation(cubemap_shader, "view_mat"),
+			proj_mat : gl.getUniformLocation(cubemap_shader, "proj_mat"),
+			cubemap : gl.getUniformLocation(cubemap_shader, "cubemap")
 		};
 
 		var sphere_vertices = generate_sphere_vertices();
@@ -930,115 +982,220 @@ Aug 20, 2019
 		gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_buffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sphere_vertices), gl.STATIC_DRAW);
 		
-		var sky_vertices = generate_sky_vertices();
-		var sky_vertex_buffer = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, sky_vertex_buffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sky_vertices), gl.STATIC_DRAW);
+		var cube_vertices = generate_cube_vertices();
+		var cube_vertex_buffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, cube_vertex_buffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cube_vertices), gl.STATIC_DRAW);
 
-		var sky_cubemap = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP, sky_cubemap);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, 1024, 1024, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		var framebuffer = gl.createFramebuffer();
+		var renderbuffer = gl.createRenderbuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+		gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_STENCIL, 1024, 1024);
+		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+		var hdr_cubemap = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, hdr_cubemap);
+		for (var i = 0; i < 6; i += 1) {
+			gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, gl.RGBA16F, 1024, 1024, 0, gl.RGBA, gl.FLOAT, null);
+		}
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);  
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 
-    var sky_rt = new Image();
-    var sky_lf = new Image();
-    var sky_up = new Image();
-    var sky_dn = new Image();
-    var sky_ft = new Image();
-    var sky_bk = new Image();
-		sky_rt.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_rt); };
-		sky_lf.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_lf); };
-		sky_up.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_up); };
-		sky_dn.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_dn); };
-		sky_ft.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_ft); };
-		sky_bk.onload = function() { gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sky_bk); };
-		sky_rt.src = "/data/images/bluecloud_rt.jpg";
-		sky_lf.src = "/data/images/bluecloud_lf.jpg";
-		sky_up.src = "/data/images/bluecloud_up.jpg";
-		sky_dn.src = "/data/images/bluecloud_dn.jpg";
-		sky_ft.src = "/data/images/bluecloud_ft.jpg";
-		sky_bk.src = "/data/images/bluecloud_bk.jpg";
-
-		var hdr_env_map_src = new HDRImage();
-		hdr_env_map_src.src = "/lib/hdrpng.min.js";
-		var hdr_env_map = gl.createTexture();
-		hdr_env_map.onload = function() {
-			gl.bindTexture(gl.TEXTURE_2D, hdr_env_map);
-			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, hdr_env_map_src);  
-			// gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, hdr_env_map_src.width, hdr_env_map_src.height, 0, gl.RGB, gl.FLOAT, hdr_env_map_src.dataFloat); 
-		}  		
+		var hdr_irradiance_cubemap = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, hdr_irradiance_cubemap);
+		for (var i = 0; i < 6; i += 1) {
+			gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, gl.RGBA16F, 1024, 1024, 0, gl.RGBA, gl.FLOAT, null);
+		}
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
 		
-		gl.enable(gl.DEPTH_TEST);
-		gl.depthFunc(gl.LEQUAL);
+		var hdr_envmap = gl.createTexture();
+		var hdr_envmap_src = new HDRImage();
+		hdr_envmap_src.onload = function() {
+			gl.bindTexture(gl.TEXTURE_2D, hdr_envmap);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, hdr_envmap_src.width, hdr_envmap_src.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, hdr_envmap_src.dataRGBE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+			console.log("loaded hdr_envmap: ", hdr_envmap_src.width, hdr_envmap_src.height);
+			
+			gl.useProgram(equirect_to_cube_shader);
 
-		var begin = performance.now();
-		var then = begin;
-		var min_frame_time = 32;
-		
-		var model_mat = mat4_identity();
-		var view_mat = mat4_view([60, 60, 30], [0, 0, 0]);
-		var fovy = deg_to_rad(45);
-		var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-		var proj_mat = mat4_perspective(fovy, aspect, 0.1, 10000);
+			gl.bindBuffer(gl.ARRAY_BUFFER, cube_vertex_buffer);
+			gl.vertexAttribPointer(equirect_to_cube_shader_info.position, 3, gl.FLOAT, false, 32, 0);
+			gl.enableVertexAttribArray(equirect_to_cube_shader_info.position);
 
-		function render(now) {
-			var dt = now - then;
-			if (dt >= min_frame_time) {
-				then = now;
-				var time = now - begin;
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_2D, hdr_envmap);
+			gl.uniform1i(equirect_to_cube_shader_info.env_map, 0);
+
+			gl.uniformMatrix4fv(equirect_to_cube_shader_info.model_mat, false, mat4_identity());
+			gl.uniformMatrix4fv(equirect_to_cube_shader_info.proj_mat, false, mat4_perspective(deg_to_rad(90), 1, 0.1, 1000));
+
+			gl.viewport(0, 0, 1024, 1024);
+			gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+
+			var view_mats = [
+				mat4_view([0, 0, 0], [1, 0, 0], [0, -1, 0]),
+				mat4_view([0, 0, 0], [-1, 0, 0], [0, -1, 0]),
+				mat4_view([0, 0, 0], [0, 1, 0], [0, 0, 1]),
+				mat4_view([0, 0, 0], [0, -1, 0], [0, 0, -1]),
+				mat4_view([0, 0, 0], [0, 0, 1], [0, -1, 0]),
+				mat4_view([0, 0, 0], [0, 0, -1], [0, -1, 0])
+			];
+
+			for (var i = 0; i < 6; i += 1) {
+				gl.uniformMatrix4fv(equirect_to_cube_shader_info.view_mat, false, view_mats[i]);
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, hdr_cubemap, 0);
 				
 				gl.clearColor(0, 0, 0, 1);
 				gl.clearDepth(1);
 				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-				gl.useProgram(sphere_shader);
+				gl.drawArrays(gl.TRIANGLES, 0, 36);
+			}
+			gl.finish();
+			console.log("converted hdr_envmap to hdr_cubemap");
+
+			gl.useProgram(irradiance_shader);
+
+			gl.activeTexture(gl.TEXTURE0);
+			gl.bindTexture(gl.TEXTURE_CUBE_MAP, hdr_cubemap);
+			gl.uniform1i(irradiance_shader_info.cubemap, 0);
+
+			gl.uniformMatrix4fv(irradiance_shader_info.model_mat, false, mat4_identity());
+			gl.uniformMatrix4fv(irradiance_shader_info.proj_mat, false, mat4_perspective(deg_to_rad(90), 1, 0.1, 1000));
+
+			for (var i = 0; i < 6; i += 1) {
+				gl.uniformMatrix4fv(irradiance_shader_info.view_mat, false, view_mats[i]);
+				gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X + i, hdr_irradiance_cubemap, 0);
+				
+				gl.clearColor(0, 0, 0, 1);
+				gl.clearDepth(1);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+				gl.drawArrays(gl.TRIANGLES, 0, 36);
+			}
+			gl.finish();
+			console.log("converted hdr_cubemap to hdr_irradiance_cubemap");
+
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+		};
+		hdr_envmap_src.src = "/data/images/pisa.hdr";
+		
+		var begin = performance.now();
+		var then = begin;
+		var min_frame_time = 32;
+		
+		var model_mat = mat4_identity();
+		var view_mat = mat4_view([60, 60, 30], [0, 0, 0], [0, 1, 0]);
+		var fovy = deg_to_rad(45);
+		var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+		var proj_mat = mat4_perspective(fovy, aspect, 0.1, 1000);
+
+		var mouse_state = {
+			down: false,
+			move_x: 0,
+			move_y: 0,
+			prev_x: 0,
+			prev_y: 0
+		};
+
+		canvas.addEventListener("mouseenter", function(event) {
+			mouse_state.down = (event.buttons === 1);
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+		canvas.addEventListener("mousemove", function(event) {
+			if (mouse_state.down) {
+				mouse_state.move_x += event.clientX - mouse_state.prev_x;
+				mouse_state.move_y += event.clientY - mouse_state.prev_y;
+				mouse_state.prev_x = event.clientX;
+				mouse_state.prev_y = event.clientY;
+			}
+		});
+		canvas.addEventListener("mousedown", function(event) {
+			mouse_state.down = true;
+			mouse_state.move_x = 0;
+			mouse_state.move_y = 0;
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+		canvas.addEventListener("mouseup", function(event) {
+			mouse_state.down = false;
+			mouse_state.move_x = 0;
+			mouse_state.move_y = 0;
+			mouse_state.prev_x = event.clientX;
+			mouse_state.prev_y = event.clientY;
+		});
+
+		var sphere_eye = [0, 0, 10];
+		var cube_lookat = [0, 0, -10];
+
+		function render(now) {
+			var dt = now - then;
+			if (dt >= min_frame_time) {
+				then = now;
+
+				var move_x = mouse_state.move_x / canvas.width;
+				var move_y = mouse_state.move_y / canvas.height;
+				mouse_state.move_x = 0;
+				mouse_state.move_y = 0;
+				var rotate_mat = mat3_from_quat(quat_from_axis_rotate([0, 1, 0], move_x));
+				sphere_eye = vec3_transform(sphere_eye, rotate_mat);
+				cube_lookat = vec3_transform(cube_lookat, rotate_mat);
+
+				gl.viewport(0, 0, canvas.width, canvas.height);
+				gl.clearColor(0, 0, 0, 1);
+				gl.clearDepth(1);
+				gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+				gl.useProgram(cubemap_shader);
 
 				gl.bindBuffer(gl.ARRAY_BUFFER, sphere_vertex_buffer);
-				gl.vertexAttribPointer(sphere_shader_info.position, 3, gl.FLOAT, false, 0, 0);
-				gl.enableVertexAttribArray(sphere_shader_info.position);
+				gl.vertexAttribPointer(cubemap_shader_info.position, 3, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(cubemap_shader_info.position);
 
 				gl.activeTexture(gl.TEXTURE0);
-				gl.bindTexture(gl.TEXTURE_CUBE_MAP, sky_cubemap);
-				gl.uniform1i(sphere_shader_info.sky_cubemap, 0);
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, hdr_cubemap);
+				gl.uniform1i(cubemap_shader_info.cubemap, 0);
 
-				gl.activeTexture(gl.TEXTURE1);
-				gl.bindTexture(gl.TEXTURE_2D, hdr_env_map);
-				gl.uniform1i(sphere_shader_info.env_map, 1);
-
-				gl.uniformMatrix4fv(sphere_shader_info.model_mat, false, mat4_translate([-2, 0, 0]));
-				gl.uniformMatrix4fv(sphere_shader_info.view_mat, false, mat4_view([0, 0, 10], [0, 0, 0]));
-				gl.uniformMatrix4fv(sphere_shader_info.proj_mat, false, proj_mat);
+				gl.uniformMatrix4fv(cubemap_shader_info.model_mat, false, mat4_translate([-2, 0, 0]));
+				gl.uniformMatrix4fv(cubemap_shader_info.view_mat, false, mat4_view(sphere_eye, [0, 0, 0], [0, 1, 0]));
+				gl.uniformMatrix4fv(cubemap_shader_info.proj_mat, false, proj_mat);
 				
 				gl.drawArrays(gl.TRIANGLES, 0, sphere_vertices.length / 3);
 
-				gl.uniformMatrix4fv(sphere_shader_info.model_mat, false, mat4_translate([2, 0, 0]));
+				gl.activeTexture(gl.TEXTURE0);
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, hdr_irradiance_cubemap);
+				gl.uniform1i(cubemap_shader_info.cubemap, 0);
+
+				gl.uniformMatrix4fv(cubemap_shader_info.model_mat, false, mat4_translate([2, 0, 0]));
 
 				gl.drawArrays(gl.TRIANGLES, 0, sphere_vertices.length / 3);
-				
-				gl.useProgram(sky_shader);
 
-				gl.bindBuffer(gl.ARRAY_BUFFER, sky_vertex_buffer);
-				gl.vertexAttribPointer(sky_shader_info.position, 3, gl.FLOAT, false, 0, 0);
-				gl.enableVertexAttribArray(sky_shader_info.position);
+				gl.bindBuffer(gl.ARRAY_BUFFER, cube_vertex_buffer);
+				gl.vertexAttribPointer(cubemap_shader_info.position, 3, gl.FLOAT, false, 32, 0);
+				gl.enableVertexAttribArray(cubemap_shader_info.position);
 
 				gl.activeTexture(gl.TEXTURE0);
-				gl.bindTexture(gl.TEXTURE_CUBE_MAP, sky_cubemap);
-				gl.uniform1i(sky_shader_info.sky_cubemap, 0);
+				gl.bindTexture(gl.TEXTURE_CUBE_MAP, hdr_cubemap);
+				gl.uniform1i(cubemap_shader_info.cubemap, 0);
 
-				gl.uniformMatrix4fv(sky_shader_info.model_mat, false, mat4_identity());
-				gl.uniformMatrix4fv(sky_shader_info.view_mat, false, mat4_view([0, 0, 0], [1, 1, 1]));
-				gl.uniformMatrix4fv(sky_shader_info.proj_mat, false, proj_mat);
+				gl.uniformMatrix4fv(cubemap_shader_info.model_mat, false, mat4_scale([100, 100, 100]));
+				gl.uniformMatrix4fv(cubemap_shader_info.view_mat, false, mat4_view([0, 0, 0], cube_lookat, [0, 1, 0]));
+				gl.uniformMatrix4fv(cubemap_shader_info.proj_mat, false, proj_mat);
 				
-				// gl.drawArrays(gl.TRIANGLES, 0, sky_vertices.length / 3);
+				gl.drawArrays(gl.TRIANGLES, 0, 36);
 			}
 			requestAnimationFrame(render);
 		};

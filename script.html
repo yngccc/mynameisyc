@@ -40,6 +40,19 @@
 						v1[0] * v2[1] - v2[0] * v1[1]];
 	};
 
+  function vec3_transform(v, m) {
+    var v0 = m[0] * v[0];
+    var v1 = m[1] * v[0];
+    var v2 = m[2] * v[0];
+    v0 += m[3] * v[1];
+    v1 += m[4] * v[1];
+    v2 += m[5] * v[1];
+    v0 += m[6] * v[2];
+    v1 += m[7] * v[2];
+    v2 += m[8] * v[2];
+    return [v0, v1, v2];
+  };
+
 	function vec4_add(v1, v2) {
 		return [v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2], v1[3] + v2[3]]
 	};
@@ -54,7 +67,7 @@
 			clone[i] = m[i];
 		}
 		return clone;
-  }
+  };
 
 	function mat4_mult(m1, m2) {
 		var m1_c1 = m1.slice(0, 4);
@@ -107,8 +120,7 @@
 		return mat;
 	};
 	
-	function mat4_view(eye, center) {
-		var up = [0, 1, 0];
+  function mat4_view(eye, center, up) {
 		var f = vec3_normalize(vec3_sub(center, eye));
 		if (vec3_eq(f, up) || vec3_eq(f, -up)) {
 			f[0] -= 0.000001;
@@ -143,6 +155,44 @@
 		mat[14] = (2 * zfar * znear) / (znear - zfar);
 		return mat;
 	};
+
+  function quat_from_axis_rotate(axis, angle) {
+  	var axis_n = vec3_normalize(axis);
+  	var sin = Math.sin(angle * 0.5);
+  	var cos = Math.cos(angle * 0.5);
+		return [axis_n[0] * sin, axis_n[1] * sin, axis_n[2] * sin, cos];
+  };
+
+  function mat3_from_quat(q) {
+  	var qxx = q[0] * q[0];
+  	var qyy = q[1] * q[1];
+  	var qzz = q[2] * q[2];
+  	var qxz = q[0] * q[2];
+  	var qxy = q[0] * q[1];
+  	var qyz = q[1] * q[2];
+  	var qwx = q[3] * q[0];
+  	var qwy = q[3] * q[1];
+  	var qwz = q[3] * q[2];
+  	return [1 - 2 * (qyy + qzz), 2 * (qxy + qwz), 2 * (qxz - qwy),
+						2 * (qxy - qwz), 1 - 2 * (qxx + qzz), 2 * (qyz + qwx),
+						2 * (qxz + qwy), 2 * (qyz - qwx), 1 - 2 * (qxx + qyy)];
+  };
+
+  function mat4_from_quat(q) {
+  	var qxx = q[0] * q[0];
+  	var qyy = q[1] * q[1];
+  	var qzz = q[2] * q[2];
+  	var qxz = q[0] * q[2];
+  	var qxy = q[0] * q[1];
+  	var qyz = q[1] * q[2];
+  	var qwx = q[3] * q[0];
+  	var qwy = q[3] * q[1];
+  	var qwz = q[3] * q[2];
+  	return [1 - 2 * (qyy + qzz), 2 * (qxy + qwz), 2 * (qxz - qwy), 0,
+						2 * (qxy - qwz), 1 - 2 * (qxx + qzz), 2 * (qyz + qwx), 0,
+						2 * (qxz + qwy), 2 * (qyz - qwx), 1 - 2 * (qxx + qyy), 0,
+						0, 0, 0, 1];
+  };
 
 	function get_frustum_corners(fovy, aspect, znear, zfar) {
 		var near_height = 2 * Math.tan(fovy / 2) * znear;
@@ -240,6 +290,25 @@
 		
 		return obj;
 	};
+
+  function gl_gen_shader(gl, vert_shader_src, frag_shader_src, shader_name) {
+  	var vert_shader = gl.createShader(gl.VERTEX_SHADER);
+  	var frag_shader = gl.createShader(gl.FRAGMENT_SHADER);
+  	gl.shaderSource(vert_shader, vert_shader_src);
+  	gl.shaderSource(frag_shader, frag_shader_src);
+  	gl.compileShader(vert_shader);
+  	gl.compileShader(frag_shader);
+  	console.log(shader_name + "_vert_shader status: " + gl.getShaderInfoLog(vert_shader));
+  	console.log(shader_name + "_frag_shader status: " + gl.getShaderInfoLog(frag_shader));
+  
+  	var shader = gl.createProgram();
+  	gl.attachShader(shader, vert_shader);
+  	gl.attachShader(shader, frag_shader);
+  	gl.linkProgram(shader);
+  	console.log(shader_name + "_shader status: " + gl.getProgramInfoLog(shader));
+  
+  	return shader;
+  };
 	
 </script>
 
